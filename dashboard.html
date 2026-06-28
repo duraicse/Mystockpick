@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MktOS — Market Intelligence</title>
+<style>
+:root{--bg:#0A0F1E;--bg2:#0D1527;--bg3:#111A2E;--border:#1E2D4A;--border2:#243858;--text:#E8EDF5;--text2:#8B9AB0;--accent:#3b82f6;--green:#22c55e;--gbg:rgba(34,197,94,.12);--red:#ef4444;--rbg:rgba(239,68,68,.12);--amber:#f59e0b;--abg:rgba(245,158,11,.12);--blue:#3b82f6;--bbg:rgba(59,130,246,.12);--r:10px;--r2:6px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.ticker-strip{background:var(--bg2);border-bottom:1px solid var(--border);padding:6px 0;overflow:hidden;white-space:nowrap;}
+.ticker-inner{display:inline-block;animation:scroll 40s linear infinite;}
+.ticker-item{display:inline-block;margin:0 20px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);}
+.ticker-item .sym{color:var(--text);font-weight:600;margin-right:5px;}
+.ticker-item .up{color:var(--green);}.ticker-item .dn{color:var(--red);}
+@keyframes scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.header{padding:11px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg2);}
+.logo{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;letter-spacing:.05em;}
+.logo em{color:var(--accent);font-style:normal;}
+.hr{display:flex;align-items:center;gap:10px;}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--green);display:none;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.htime{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);}
+.spill{font-size:10px;padding:2px 7px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-weight:600;}
+.sy{background:var(--gbg);color:var(--green);}.se{background:var(--abg);color:var(--amber);}.sf{background:var(--bg3);color:var(--text2);}
+.bsm{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:5px 12px;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;}
+.bsm:hover{color:var(--text);border-color:var(--accent);}
+.status-bar{padding:6px 20px;font-size:11px;font-family:'JetBrains Mono',monospace;border-bottom:1px solid var(--border);}
+.tab-bar{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;user-select:none;}
+.tab:hover{color:var(--text);}.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tc{padding:16px 20px;display:none;}.tc.active{display:block;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;}
+.card:last-child{margin-bottom:0;}
+.ct{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px;}
+.mb{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;}
+.ms{font-size:12px;color:var(--text2);margin-top:4px;}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;}
+.bu{background:var(--gbg);color:var(--green);}.bd{background:var(--rbg);color:var(--red);}.bn{background:var(--bg3);color:var(--text2);}.bi{background:var(--bbg);color:var(--blue);}.bw{background:var(--abg);color:var(--amber);}
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;font-size:10px;font-weight:500;color:var(--text2);padding:6px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em;}
+td{padding:8px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg3);}
+.up{color:var(--green);}.dn{color:var(--red);}
+.ab{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:6px 14px;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer;margin:0 5px 5px 0;}
+.ab:hover{border-color:var(--accent);}.ab.p{background:var(--bbg);color:var(--accent);border-color:var(--accent);}
+.aibox{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:12px 14px;font-size:13px;line-height:1.65;margin-top:10px;display:none;white-space:pre-wrap;}
+.aibox.on{display:block;}.aibox.ld{color:var(--text2);font-style:italic;}
+/* Signal cards */
+.sc{border-radius:var(--r);padding:14px;margin-bottom:10px;border:1.5px solid;}
+.sc.strong-buy{background:var(--gbg);border-color:var(--green);}
+.sc.buy{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.45);}
+.sc.watch{background:var(--abg);border-color:var(--amber);}
+.sc.hold{background:var(--bg3);border-color:var(--border);}
+.sc.avoid{background:var(--rbg);border-color:var(--red);}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.ss{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;}
+.sb{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;padding:3px 10px;border-radius:4px;}
+.sb.sb-sb,.sb.sb-b{background:var(--gbg);color:var(--green);}
+.sb.sb-w{background:var(--abg);color:var(--amber);}
+.sb.sb-h{background:var(--bg3);color:var(--text2);}
+.sb.sb-av{background:var(--rbg);color:var(--red);}
+/* S/R bar */
+.srw{position:relative;height:28px;background:var(--bg3);border-radius:6px;overflow:hidden;margin:10px 0 4px;}
+.srs{position:absolute;top:0;height:100%;background:var(--green);opacity:.18;}
+.srr{position:absolute;top:0;height:100%;background:var(--red);opacity:.18;}
+.src{position:absolute;top:0;width:3px;height:100%;background:var(--accent);border-radius:2px;}
+.srl{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:2px;position:relative;}
+/* SR loading indicator */
+.sr-loading{font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;padding:6px 0;text-align:center;font-style:italic;}
+/* Entry grid */
+.eg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;}
+.ec{text-align:center;padding:7px 4px;border-radius:6px;border:1px solid var(--border);background:var(--bg);}
+.el{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;}
+.ev{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;margin-top:2px;}
+.ev.en{color:var(--accent);}.ev.es{color:var(--red);}.ev.et{color:var(--green);}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.chip{font-size:11px;padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;background:var(--bg3);color:var(--text2);}
+.cg{background:var(--gbg);color:var(--green);}.cr{background:var(--rbg);color:var(--red);}.ca{background:var(--abg);color:var(--amber);}.cb{background:var(--bbg);color:var(--blue);}
+.scirc{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;flex-shrink:0;}
+.scirc.h{background:var(--gbg);color:var(--green);}.scirc.m{background:var(--abg);color:var(--amber);}.scirc.l{background:var(--rbg);color:var(--red);}.scirc.n{background:var(--bg3);color:var(--text2);}
+.fr{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.fb{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-weight:500;}
+.fb.active{background:var(--bbg);color:var(--accent);border-color:var(--accent);}
+/* News */
+.ntabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.ntab{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-weight:500;}
+.ntab.active{background:var(--bbg);color:var(--accent);border-color:var(--accent);}
+.ni{padding:12px 0;border-bottom:1px solid var(--border);display:flex;gap:12px;}
+.ni:last-child{border-bottom:none;}
+.nph{width:64px;height:64px;border-radius:var(--r2);background:var(--bg3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.nthumb{width:64px;height:64px;border-radius:var(--r2);object-fit:cover;flex-shrink:0;}
+.nsrc{font-size:11px;font-weight:600;color:var(--accent);}
+.ntitle{font-size:13px;font-weight:500;line-height:1.4;margin:3px 0;}
+.ntitle a{color:var(--text);text-decoration:none;}.ntitle a:hover{color:var(--accent);}
+.nsnip{font-size:11px;color:var(--text2);line-height:1.45;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.nmeta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
+.ntag{font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;background:var(--bbg);color:var(--accent);font-family:'JetBrains Mono',monospace;}
+.nl{text-align:center;padding:28px;color:var(--text2);font-size:13px;line-height:1.7;}
+.nhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.nstat{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text2);}
+.tc2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.sl{display:flex;flex-direction:column;gap:7px;}
+.lr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);}
+input[type=text]{width:100%;font-size:13px;padding:8px 12px;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;margin-bottom:8px;}
+input[type=text]:focus{outline:none;border-color:var(--accent);}
+.or{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:8px;align-items:center;padding:7px 8px;border-bottom:1px solid var(--border);}
+.or:last-child{border-bottom:none;}
+.st{font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;}
+.stb{background:var(--gbg);color:var(--green);}.str{background:var(--rbg);color:var(--red);}
+.hg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;}
+.hc{border-radius:4px;padding:4px 2px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;}
+@media(max-width:600px){.tc2{grid-template-columns:1fr;}}
+</style></head>
+<body>
+<div class="ticker-strip"><div class="ticker-inner" id="tkr">
+  <span class="ticker-item"><span class="sym">MKTOS</span><span class="up">connecting to localhost:3001…</span></span>
+  <span class="ticker-item"><span class="sym">MKTOS</span><span class="up">connecting to localhost:3001…</span></span>
+</div></div>
+
+<div class="header">
+  <div class="logo">MKT<em>OS</em> <span style="font-size:11px;font-weight:400;color:var(--text2)">v4 · Python · Yahoo Finance · Dynamic S/R</span></div>
+  <div class="hr">
+    <span class="ldot" id="ldot"></span>
+    <span id="spill" class="spill sf">—</span>
+    <span class="htime" id="htime">—</span>
+    <button class="bsm" onclick="boot()">↻ <span id="rlbl">Refresh</span></button>
+  </div>
+</div>
+<div class="status-bar" id="sb" style="background:var(--abg);color:var(--amber)">Connecting to Python server at localhost:3001…</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="sw('signals')">⚡ Buy Signals</div>
+  <div class="tab" onclick="sw('ta')">📊 Technical</div>
+  <div class="tab" onclick="sw('news')">📰 News <span id="nbadge" style="display:none;font-size:10px;padding:1px 5px;border-radius:8px;background:var(--gbg);color:var(--green);font-family:'JetBrains Mono',monospace;font-weight:600;margin-left:3px"></span></div>
+  <div class="tab" onclick="sw('earnings')">💰 Earnings</div>
+  <div class="tab" onclick="sw('bigmoney')">🏦 Big Money</div>
+  <div class="tab" onclick="sw('options')">🔥 QQQ Options</div>
+  <div class="tab" onclick="sw('growth')">🚀 Growth</div>
+  <div class="tab" onclick="sw('smc')">🧠 SMC</div>
+  <div class="tab" onclick="sw('smc')">🧠 SMC</div>
+</div>
+
+<!-- BUY SIGNALS -->
+<div class="tc active" id="tab-signals">
+  <div class="g4">
+    <div class="card" style="margin:0"><div class="ct">⚡ Strong Buy</div><div class="mb up" id="c-sb">—</div><div class="ms">signals</div></div>
+    <div class="card" style="margin:0"><div class="ct">▲ Buy</div><div class="mb up" id="c-b">—</div><div class="ms">signals</div></div>
+    <div class="card" style="margin:0"><div class="ct">◎ Watch</div><div class="mb" style="color:var(--amber)" id="c-w">—</div><div class="ms">near signal</div></div>
+    <div class="card" style="margin:0"><div class="ct">✕ Avoid</div><div class="mb dn" id="c-av">—</div><div class="ms">signals</div></div>
+  </div><br>
+  <div class="fr">
+    <button class="fb active" onclick="filt('all',this)">All</button>
+    <button class="fb" onclick="filt('strong-buy',this)">Strong Buy</button>
+    <button class="fb" onclick="filt('buy',this)">Buy+</button>
+    <button class="fb" onclick="filt('watch',this)">Watch</button>
+    <button class="fb" onclick="filt('avoid',this)">Avoid</button>
+  </div>
+  <div id="sigCards"><div class="nl">Waiting for Python server at localhost:3001…<br><small style="margin-top:6px;display:block">Run: <code>python server.py</code></small></div></div>
+  <div class="card">
+    <div class="ct">🤖 AI Signal Analyst</div>
+    <input type="text" id="sigin" placeholder="e.g. Which buy signal has the best risk/reward?"/>
+    <button class="ab p" onclick="runAI('signals')">✦ Analyze ↗</button>
+    <button class="ab" onclick="ask('Which signal has cleanest setup — support holding, best upside to resistance?')">Best setup ↗</button>
+    <div class="aibox" id="ai-signals"></div>
+  </div>
+</div>
+
+<!-- TECHNICAL -->
+<div class="tc" id="tab-ta">
+  <div class="g4">
+    <div class="card" style="margin:0"><div class="ct">NVDA</div><div class="mb mono" id="cq-NVDA">—</div><div class="ms" id="cs-NVDA">—</div></div>
+    <div class="card" style="margin:0"><div class="ct">GOOG</div><div class="mb mono" id="cq-GOOG">—</div><div class="ms" id="cs-GOOG">—</div></div>
+    <div class="card" style="margin:0"><div class="ct">NVDA</div><div class="mb mono" id="cq-NVDA">—</div><div class="ms" id="cs-NVDA">—</div></div>
+    <div class="card" style="margin:0"><div class="ct">—</div><div class="mb mono" id="cq-X1">—</div><div class="ms" id="cs-X1">—</div></div>
+  </div><br>
+  <div class="card">
+    <div class="ct">🤖 AI Technical Scan</div>
+    <input type="text" id="tain" placeholder="e.g. NVDA — EMA crossover and MACD"/>
+    <button class="ab p" onclick="runAI('ta')">✦ Analyze ↗</button>
+    <button class="ab" onclick="ask('Full technical analysis NVDA — EMA 9/21/50, MACD, ATR, entry/stop/target')">NVDA deep scan ↗</button>
+    <div class="aibox" id="ai-ta"></div>
+  </div>
+  <div class="card">
+    <div class="ct">Signal board — Yahoo Finance live · S/R from real price history</div>
+    <div class="tw"><table>
+      <thead><tr><th>Symbol</th><th>Price</th><th>Chg%</th><th>Open</th><th>S1 (support)</th><th>S2 (strong sup)</th><th>R1 (resistance)</th><th>R2 (strong res)</th><th>ATR</th><th>EMA</th><th>RSI</th><th>Score</th><th>Signal</th><th>Src</th></tr></thead>
+      <tbody id="fullTable"><tr><td colspan="14" style="text-align:center;color:var(--text2);padding:16px">Loading…</td></tr></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- NEWS -->
+<div class="tc" id="tab-news">
+  <div class="ntabs">
+    <button class="ntab active" onclick="switchNews('general','📰 Market',this)">📰 Market</button>
+    <button class="ntab" onclick="switchNews('NVDA','NVDA',this)">NVDA</button>
+    <button class="ntab" onclick="switchNews('GOOG','GOOG',this)">GOOG</button>
+  </div>
+  <div class="card">
+    <div class="nhdr">
+      <div class="ct" style="margin:0">📰 <span id="nlabel">Market News</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="nstat" id="nstat">—</span>
+        <button class="bsm" onclick="loadNews()">↻ Refresh</button>
+      </div>
+    </div>
+    <div id="newsFeed"><div class="nl">⏳ Loading via Python server…</div></div>
+  </div>
+  <div class="card">
+    <div class="ct">🤖 AI News Brief</div>
+    <button class="ab p" onclick="runAI('news')">✦ Summarize today ↗</button>
+    <button class="ab" onclick="ask('Key macro catalysts this week — Fed, CPI, earnings?')">Macro catalysts ↗</button>
+    <button class="ab" onclick="ask('News affecting NVDA and GOOG today?')">Portfolio scan ↗</button>
+    <button class="ab" onclick="briefNews()">✦ Brief loaded headlines ↗</button>
+    <div class="aibox" id="ai-news"></div>
+  </div>
+</div>
+
+<!-- EARNINGS -->
+<div class="tc" id="tab-earnings">
+  <div class="tc2">
+    <div class="card" style="margin:0"><div class="ct">📅 This week</div>
+      <div class="sl">
+        <div class="lr"><div><div class="mono" style="font-weight:600">ORCL</div><div style="font-size:11px;color:var(--text2)">Mon AMC</div></div><span class="badge bi">Est $1.64</span></div>
+        <div class="lr"><div><div class="mono" style="font-weight:600">FDX</div><div style="font-size:11px;color:var(--text2)">Tue AMC</div></div><span class="badge bi">Est $5.42</span></div>
+        <div class="lr"><div><div class="mono" style="font-weight:600">NKE</div><div style="font-size:11px;color:var(--text2)">Thu AMC</div></div><span class="badge bw">Est $0.29</span></div>
+      </div>
+    </div>
+    <div class="card" style="margin:0"><div class="ct">⭐ Recent beats</div>
+      <div class="sl">
+        <div class="lr"><div><div class="mono" style="font-weight:600">ADBE</div><div style="font-size:11px;color:var(--text2)">Beat +8.3%</div></div><span class="badge bu">▲11.2%</span></div>
+        <div class="lr"><div><div class="mono" style="font-weight:600">MELI</div><div style="font-size:11px;color:var(--text2)">Beat +6.1%</div></div><span class="badge bu">▲8.7%</span></div>
+        <div class="lr"><div><div class="mono" style="font-weight:600">CRM</div><div style="font-size:11px;color:var(--text2)">Miss -2.1%</div></div><span class="badge bd">▼3.4%</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">🤖 AI Earnings Analyst</div>
+    <input type="text" id="earnin" placeholder="e.g. ORCL earnings preview — buy before or after?"/>
+    <button class="ab p" onclick="runAI('earnings')">✦ Analyze ↗</button>
+    <button class="ab" onclick="ask('Post-earnings ADBE — sustainable beat? Buy now?')">ADBE ↗</button>
+    <div class="aibox" id="ai-earnings"></div>
+  </div>
+  <div class="card">
+    <div class="ct">Analyst upgrades / downgrades (7d)</div>
+    <div class="tw"><table><thead><tr><th>Symbol</th><th>Firm</th><th>Action</th><th>Old PT</th><th>New PT</th></tr></thead><tbody>
+      <tr><td class="mono" style="font-weight:600">NVDA</td><td>Goldman</td><td><span class="badge bu">Upgrade BUY</span></td><td class="mono">$120</td><td class="mono">$160</td></tr>
+      <tr><td class="mono" style="font-weight:600">PLTR</td><td>Wedbush</td><td><span class="badge bu">PT Raise</span></td><td class="mono">$28</td><td class="mono">$38</td></tr>
+      <tr><td class="mono" style="font-weight:600">META</td><td>MS</td><td><span class="badge bu">Overweight</span></td><td class="mono">$580</td><td class="mono">$650</td></tr>
+      <tr><td class="mono" style="font-weight:600">SOFI</td><td>JPMorgan</td><td><span class="badge bu">Upgrade OW</span></td><td class="mono">$13</td><td class="mono">$17</td></tr>
+      <tr><td class="mono" style="font-weight:600">NOW</td><td>Citi</td><td><span class="badge bd">Downgrade</span></td><td class="mono">$850</td><td class="mono">$790</td></tr>
+    </tbody></table></div>
+  </div>
+</div>
+
+<!-- BIG MONEY -->
+<div class="tc" id="tab-bigmoney">
+
+  <!-- Symbol selector -->
+  <div class="fr" id="bm-sym-row">
+    <button class="fb active" onclick="loadBigMoney('NVDA',this)">NVDA</button>
+    <button class="fb" onclick="loadBigMoney('GOOG',this)">GOOG</button>
+  </div>
+
+  <!-- Summary cards — populated live -->
+  <div class="g4" style="margin-top:12px">
+    <div class="card" style="margin:0">
+      <div class="ct">📊 Put/Call Ratio</div>
+      <div class="mb mono" id="bm-pcr">—</div>
+      <div class="ms" id="bm-pcr-lbl">—</div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="ct">🎯 Max Pain</div>
+      <div class="mb mono" id="bm-mp">—</div>
+      <div class="ms" id="bm-mp-lbl">—</div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="ct">📈 IV Rank</div>
+      <div class="mb mono" id="bm-iv">—</div>
+      <div class="ms" id="bm-iv-lbl">—</div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="ct">💰 Options Flow</div>
+      <div class="mb" id="bm-flow">—</div>
+      <div class="ms" id="bm-flow-lbl">—</div>
+    </div>
+  </div>
+
+  <div id="bm-content" style="margin-top:12px">
+    <div class="nl">⏳ Select a symbol above to load real options flow…</div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="ct">🤖 AI Big Money Analyst</div>
+    <input type="text" id="bmin" placeholder="e.g. QQQ PCR 0.74 and max pain $490 — what is smart money targeting?"/>
+    <button class="ab p" onclick="runAI('bigmoney')">✦ Interpret ↗</button>
+    <button class="ab" onclick="ask('QQQ unusual options — are these hedges or directional bets? What strike is smart money targeting?')">Flow interpretation ↗</button>
+    <button class="ab" onclick="ask('With current IV rank, what is the best options strategy — buy premium or sell premium?')">Best strategy ↗</button>
+    <div class="aibox" id="ai-bigmoney"></div>
+  </div>
+</div>
+
+<!-- QQQ OPTIONS -->
+<div class="tc" id="tab-options">
+
+  <!-- Symbol selector -->
+  <div class="fr" id="orb-sym-row">
+    <button class="fb active" onclick="loadORB('NVDA',this)">NVDA</button>
+    <button class="fb" onclick="loadORB('GOOG',this)">GOOG</button>
+  </div>
+
+  <!-- Live summary cards -->
+  <div class="g4" style="margin-top:12px">
+    <div class="card" style="margin:0">
+      <div class="ct">🎯 ORB Signal</div>
+      <div class="mb" id="orb-signal-val" style="font-size:16px">—</div>
+      <div class="ms" id="orb-signal-lbl">30-min opening range</div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="ct">📊 ORB Range</div>
+      <div class="mb mono" id="orb-range-val">—</div>
+      <div class="ms" id="orb-range-lbl">High / Low</div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="ct">🌊 VWAP / EMA9</div>
+      <div class="mb mono" id="orb-filters-val">—</div>
+      <div class="ms" id="orb-filters-lbl">Filter status</div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="ct">⚡ Best Strike</div>
+      <div class="mb mono" id="orb-strike-val">—</div>
+      <div class="ms" id="orb-strike-lbl">Delta 0.45–0.55</div>
+    </div>
+  </div>
+
+  <div id="orb-content" style="margin-top:12px">
+    <div class="nl">⏳ Loading ORB signal from 5-min bars… (requires market to be open or today's data)</div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="ct">🤖 AI Options Interpreter</div>
+    <input type="text" id="optin" placeholder="e.g. ORB bull breakout with delta 0.50 call — entry/stop/target?"/>
+    <button class="ab p" onclick="runAI('options')">✦ Interpret ↗</button>
+    <button class="ab" onclick="ask('QQQ ORB breakout — is this a valid setup? What is the risk/reward on the call?')">Validate setup ↗</button>
+    <button class="ab" onclick="ask('Should I take the 0DTE call or go out to next week expiry for this ORB signal?')">0DTE vs next week ↗</button>
+    <div class="aibox" id="ai-options"></div>
+  </div>
+</div>
+<!-- GROWTH -->
+<div class="tc" id="tab-growth">
+  <div class="card">
+    <div class="ct">🤖 AI Growth Screener</div>
+    <input type="text" id="grin" placeholder="e.g. Top AI infrastructure stocks with revenue acceleration"/>
+    <button class="ab p" onclick="runAI('growth')">✦ Screen ↗</button>
+    <button class="ab" onclick="ask('Top 3 growth picks — AI, energy, fintech. Entry, catalyst, risk.')">Top 3 picks ↗</button>
+    <button class="ab" onclick="ask('ADBE vs MELI — compare growth, valuation, technical. Which to add now?')">ADBE vs MELI ↗</button>
+    <div class="aibox" id="ai-growth"></div>
+  </div>
+  <div class="card">
+    <div class="ct">Growth watchlist — Yahoo Finance live · S/R from real swing pivots</div>
+    <div class="tw"><table>
+      <thead><tr><th>Symbol</th><th>Price</th><th>Chg%</th><th>Theme</th><th>S1 (support)</th><th>S2</th><th>R1 (resist)</th><th>R2</th><th>ATR</th><th>Signal</th><th>Src</th></tr></thead>
+      <tbody id="grTable"><tr><td colspan="11" style="text-align:center;color:var(--text2);padding:16px">Loading…</td></tr></tbody>
+    </table></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  MktOS Dashboard — clean single script, no duplicates
+// ════════════════════════════════════════════════════════════════
+
+// ── CONFIG ───────────────────────────────────────────────────────
+const API = 'http://localhost:3001';
+const SIG = ['NVDA','GOOG'];
+const GRW = ['NVDA','GOOG'];
+const ALL = ['NVDA','GOOG'];
+const TH  = {NVDA:'AI Chips', GOOG:'AI/Cloud'};
+
+// ── STATE ─────────────────────────────────────────────────────────
+let px={}, sigs={}, SR={}, TA={};
+let srLoaded=false, taLoaded=false;
+let af='all', ncat='general', newsLoaded=[], lastSrc='';
+let smcData={}, currentSMCSym='NVDA';
+let bmData={},  currentBMSym='NVDA';
+let orbData={}, currentORBSym='NVDA';
+
+// ── UTILITIES ─────────────────────────────────────────────────────
+const r2 = v => Math.round(v*100)/100;
+const f  = p => (p==null||isNaN(p)) ? '—' : p>=1000
+  ? '$'+p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
+  : '$'+Number(p).toFixed(2);
+const fp = v => (v==null||isNaN(v)) ? '—'
+  : `<span class="${v>=0?'up':'dn'}">${v>=0?'+':''}${Number(v).toFixed(2)}%</span>`;
+const ago = ts => {
+  const s=Math.floor((Date.now()-ts*1000)/1000);
+  return s<60?s+'s ago':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':Math.floor(s/86400)+'d ago';
+};
+function setStat(t,m){
+  const b=document.getElementById('sb');
+  b.style.background=t==='ok'?'var(--gbg)':t==='err'?'var(--rbg)':'var(--abg)';
+  b.style.color=t==='ok'?'var(--green)':t==='err'?'var(--red)':'var(--amber)';
+  b.textContent=m;
+}
+function isOpen(){
+  const e=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
+  if(e.getDay()===0||e.getDay()===6) return false;
+  const m=e.getHours()*60+e.getMinutes(); return m>=570&&m<960;
+}
+function srcBadge(s){
+  if(s==='yahoo') return '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:var(--gbg);color:var(--green);font-weight:700">Y</span>';
+  if(s==='eodhd') return '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:var(--abg);color:var(--amber);font-weight:700">E</span>';
+  return '';
+}
+
+// ── FETCH PRICES ──────────────────────────────────────────────────
+async function fetchPrices(){
+  try{
+    const r=await fetch(`${API}/api/prices?symbols=${ALL.join(',')}`);
+    if(!r.ok) throw new Error(`HTTP ${r.status} — is server running?`);
+    const j=await r.json();
+    px=j.data||{}; lastSrc=j.source||'';
+    const mkt=isOpen()?'Market OPEN':'Market CLOSED';
+    setStat('ok',`✓ ${Object.keys(px).length} tickers · ${mkt} · ${lastSrc}`);
+    document.getElementById('ldot').style.display='inline-block';
+    const pill=document.getElementById('spill');
+    if(lastSrc.includes('yahoo')){pill.textContent='Yahoo Finance';pill.className='spill sy';}
+    else{pill.textContent='EODHD';pill.className='spill se';}
+    return true;
+  }catch(e){
+    setStat('err','⚠ '+e.message);
+    document.getElementById('sigCards').innerHTML=
+      `<div class="nl" style="color:var(--red)">⚠ Cannot reach ${API}<br>
+       <span style="font-size:12px;color:var(--text2);margin-top:6px;display:block">
+         Run: <code style="background:var(--bg3);padding:3px 8px;border-radius:4px">python server.py</code>
+       </span></div>`;
+    return false;
+  }
+}
+
+// ── FETCH S/R (two-phase) ─────────────────────────────────────────
+async function fetchSR(){
+  const syms=[...new Set([...SIG,...GRW])];
+
+  // Phase 1 — instant ATR estimate so UI never shows "loading"
+  syms.forEach(sym=>{
+    const q=px[sym]; if(!q) return;
+    const p=+q.close; if(!p) return;
+    const atr=r2(p*0.018);
+    SR[sym]={s1:r2(p-1.5*atr),s2:r2(p-2.8*atr),r1:r2(p+1.2*atr),r2:r2(p+2.5*atr),atr,price:r2(p),_src:'atr'};
+  });
+  srLoaded=true;
+  renderAll();
+
+  // Phase 2 — upgrade with real swing pivots from server
+  try{
+    const ctrl=new AbortController();
+    setTimeout(()=>ctrl.abort(),5000);
+    const hints=syms.map(s=>px[s]?+px[s].close:'').join(',');
+    const r=await fetch(`${API}/api/sr/batch?symbols=${syms.join(',')}&prices=${hints}`,{signal:ctrl.signal});
+    if(!r.ok) return;
+    const j=await r.json();
+    let n=0;
+    Object.entries(j.data||{}).forEach(([sym,d])=>{
+      if(d&&d.s1&&d.r1){SR[sym]={s1:d.s1,s2:d.s2,r1:d.r1,r2:d.r2,atr:d.atr,price:d.price,_src:'pivots'};n++;}
+    });
+    if(n>0){console.log(`[SR] ${n} upgraded to swing pivots`);renderAll();}
+  }catch(e){ console.log('[SR] phase2 skipped:',e.message); }
+}
+
+// ── FETCH INDICATORS ──────────────────────────────────────────────
+async function fetchIndicators(){
+  try{
+    const ctrl=new AbortController();
+    setTimeout(()=>ctrl.abort(),8000);
+    const syms=[...new Set([...SIG,...GRW])].join(',');
+    const r=await fetch(`${API}/api/indicators/batch?symbols=${syms}`,{signal:ctrl.signal});
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const j=await r.json();
+    Object.entries(j.data||{}).forEach(([sym,d])=>{
+      TA[sym]={rsi:d.rsi,macd:d.macd,macd_hist:d.macd_hist,ema:d.ema_signal,
+               ema9:d.ema9,ema21:d.ema21,ema50:d.ema50,vol:d.volume_signal,
+               trend:d.trend,atr:d.atr};
+    });
+    taLoaded=true;
+    renderAll();
+    console.log('[TA] indicators loaded');
+  }catch(e){
+    console.log('[TA] failed:',e.message);
+    taLoaded=true;  // unblock — use price-only scoring
+    renderAll();
+  }
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────
+async function boot(){
+  document.getElementById('rlbl').textContent='…';
+  const ok=await fetchPrices();
+  if(ok){
+    renderAll();
+    await Promise.all([fetchSR(), fetchIndicators()]);
+  }
+  document.getElementById('rlbl').textContent='Refresh';
+  document.getElementById('htime').textContent=
+    new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+// ── SCORE ─────────────────────────────────────────────────────────
+function score(sym,price,chg){
+  const sr=SR[sym]||null;
+  const d=TA[sym]||null;
+  let s=20; const why=[];
+
+  // Always score from SR and momentum — no blocking
+  if(sr){
+    const dist=((price-sr.s1)/price)*100;
+    if(dist<=2&&price>sr.s2)       {s+=18;why.push(`At S1 ${f(sr.s1)}`);}
+    else if(dist<=5&&price>sr.s2)  {s+=8; why.push(`Near S1 ${f(sr.s1)}`);}
+    else if(price<sr.s2)           {s-=10;why.push(`Below S2 ${f(sr.s2)}`);}
+    else if(price>sr.r1)           {s-=5; why.push(`Above R1 ${f(sr.r1)}`);}
+  }
+  if(chg>2)      {s+=8; why.push(`+${chg.toFixed(1)}% today`);}
+  else if(chg>0.5){s+=3;}
+  else if(chg<-2){s-=8; why.push(`${chg.toFixed(1)}% today`);}
+
+  // Add indicator scoring when available
+  if(d){
+    const ema=d.ema||'';
+    if(ema==='Bullish X')          {s+=22;why.push('EMA bullish cross');}
+    else if(ema==='Strong uptrend'){s+=18;why.push('Strong uptrend');}
+    else if(ema.includes('Above')) {s+=12;why.push('Above EMA21');}
+    else if(ema==='Bearish X')     {s-=15;why.push('EMA bearish cross');}
+    else if(ema==='Below 50')      {s-=10;why.push('Below EMA50');}
+    else if(ema==='Sideways')      {s-=4; why.push('Sideways');}
+
+    const rsi=d.rsi||50;
+    if(rsi>=45&&rsi<=62)     {s+=18;why.push(`RSI ${rsi}`);}
+    else if(rsi>62&&rsi<=70) {s+=8; why.push(`RSI ${rsi} elevated`);}
+    else if(rsi>70)           {s-=8; why.push(`RSI ${rsi} OB`);}
+    else if(rsi<35)           {s+=12;why.push(`RSI ${rsi} oversold`);}
+    else                       {s-=5; why.push(`RSI ${rsi} weak`);}
+
+    const macd=d.macd||0, hist=d.macd_hist||0;
+    if(macd>0&&hist>0)       {s+=18;why.push('MACD bull+rising');}
+    else if(macd>0)          {s+=6; why.push('MACD positive');}
+    else if(macd<0&&hist<0)  {s-=10;why.push('MACD bear+falling');}
+    else                      {s+=3;}
+
+    if(d.trend==='up')   {s+=12;why.push('Uptrend');}
+    else if(d.trend==='down'){s-=8;why.push('Downtrend');}
+
+    if(d.vol==='high')   {s+=8; why.push('High vol');}
+    else if(d.vol==='low'){s-=3;}
+  } else {
+    why.unshift('Price+SR score');
+  }
+
+  s=Math.max(0,Math.min(100,s));
+  const type=s>=75?'strong-buy':s>=58?'buy':s>=42?'watch':s>=28?'hold':'avoid';
+  return{s,type,why,sr};
+}
+
+// ── SR BAR ────────────────────────────────────────────────────────
+function srBar(price,sr){
+  if(!sr) return '';   // no SR yet — show nothing, not a loading message
+  const lo=sr.s2, hi=sr.r2, range=hi-lo;
+  if(range<=0) return '';
+  const pct=v=>Math.max(0,Math.min(100,((v-lo)/range)*100));
+  const cp=pct(price), s1p=pct(sr.s1), r1p=pct(sr.r1);
+  const lbl=sr._src==='pivots'?'✓ Swing pivots':'⚡ ATR estimate';
+  return `<div class="srw">
+    <div class="srs" style="left:0;width:${s1p}%"></div>
+    <div class="srr" style="left:${r1p}%;width:${100-r1p}%"></div>
+    <div class="src" style="left:calc(${cp}% - 1px)"></div>
+  </div>
+  <div class="srl">
+    <span style="color:var(--green)">S2 ${f(sr.s2)} · S1 ${f(sr.s1)}</span>
+    <span style="color:var(--accent);position:absolute;left:calc(${Math.min(85,Math.max(8,cp))}% - 16px + 8px);font-size:10px">${f(price)}</span>
+    <span style="color:var(--red)">R1 ${f(sr.r1)} · R2 ${f(sr.r2)}</span>
+  </div>
+  <div style="font-size:10px;color:var(--text2);margin-top:2px">ATR ${sr.atr?.toFixed(2)||'—'} · ${lbl}</div>`;
+}
+
+// ── SIGNAL CARD ───────────────────────────────────────────────────
+function sigCard(sym,q,sig){
+  const price=+q.close, chg=+(q.change_p||0), sr=sig.sr, d=TA[sym]||{};
+  const TL={'strong-buy':'⚡ STRONG BUY','buy':'▲ BUY','watch':'◎ WATCH','hold':'— HOLD','avoid':'✕ AVOID'};
+  const TC={'strong-buy':'sb-sb','buy':'sb-b','watch':'sb-w','hold':'sb-h','avoid':'sb-av'};
+  const circ=sig.s>=70?'h':sig.s>=45?'m':sig.s<28?'l':'n';
+  const en=sr?(price<=sr.s1*1.03?f(sr.s1):f(price)):'—';
+  const rc=d.rsi>70?'ca':d.rsi>=50?'cg':'cr';
+  const mc=(d.macd||0)>0?'cg':'cr';
+  const ec=d.ema&&(d.ema.includes('Bull')||d.ema.includes('Above'))?'cg':'ca';
+  return `<div class="sc ${sig.type}">
+    <div class="sh">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="scirc ${circ}">${sig.s}</div>
+        <div>
+          <div class="ss">${sym} ${srcBadge(q.source)}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:1px">${f(price)} &nbsp;${fp(chg)}</div>
+        </div>
+      </div>
+      <span class="sb ${TC[sig.type]}">${TL[sig.type]}</span>
+    </div>
+    ${srBar(price,sr)}
+    <div class="eg">
+      <div class="ec"><div class="el">Entry</div><div class="ev en">${en}</div></div>
+      <div class="ec"><div class="el">Stop</div><div class="ev es">${sr?f(sr.s2):'—'}</div></div>
+      <div class="ec"><div class="el">Target</div><div class="ev et">${sr?f(sr.r1):'—'}</div></div>
+    </div>
+    <div class="chips">
+      <span class="chip ${ec}">EMA: ${d.ema||'—'}</span>
+      <span class="chip ${rc}">RSI ${d.rsi!=null?d.rsi.toFixed(1):'—'}</span>
+      <span class="chip ${mc}">MACD ${d.macd!=null?(d.macd>=0?'+':'')+d.macd.toFixed(3):'—'}</span>
+      <span class="chip ${d.vol==='high'?'cb':d.vol==='low'?'cr':''}">Vol ${d.vol||'—'}</span>
+      ${d.ema9!=null?`<span class="chip" style="font-size:10px">9:${d.ema9.toFixed(1)} 21:${d.ema21.toFixed(1)}</span>`:''}
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--text2);line-height:1.5">
+      <strong style="color:var(--text)">Why:</strong> ${sig.why.join(' · ')}
+    </div>
+  </div>`;
+}
+
+// ── RENDER FUNCTIONS ──────────────────────────────────────────────
+function renderSigs(){
+  const sorted=SIG.filter(s=>px[s]).sort((a,b)=>(sigs[b]?.s||0)-(sigs[a]?.s||0));
+  const c={'strong-buy':0,buy:0,watch:0,hold:0,avoid:0};
+  sorted.forEach(s=>{if(sigs[s]) c[sigs[s].type]=(c[sigs[s].type]||0)+1;});
+  document.getElementById('c-sb').textContent=c['strong-buy'];
+  document.getElementById('c-b').textContent=c.buy;
+  document.getElementById('c-w').textContent=c.watch;
+  document.getElementById('c-av').textContent=c.avoid;
+  let h='';
+  sorted.forEach(sym=>{
+    const q=px[sym]; if(!q) return;
+    sigs[sym]=score(sym,+q.close,+(q.change_p||0));
+    const sig=sigs[sym];
+    const show=af==='all'||sig.type===af||(af==='buy'&&(sig.type==='buy'||sig.type==='strong-buy'));
+    if(show) h+=sigCard(sym,q,sig);
+  });
+  document.getElementById('sigCards').innerHTML=h||
+    '<div style="text-align:center;color:var(--text2);padding:20px">No signals match filter.</div>';
+}
+
+function renderFullTable(){
+  const TM={'strong-buy':'bu','buy':'bu','watch':'bw','hold':'bn','avoid':'bd'};
+  const TL={'strong-buy':'⚡ STRONG BUY','buy':'▲ BUY','watch':'◎ WATCH','hold':'— HOLD','avoid':'✕ AVOID'};
+  const sorted=SIG.filter(s=>px[s]).sort((a,b)=>(sigs[b]?.s||0)-(sigs[a]?.s||0));
+  let h='';
+  sorted.forEach(sym=>{
+    const q=px[sym],sig=sigs[sym]; if(!q||!sig) return;
+    const price=+q.close,chg=+(q.change_p||0),d=TA[sym]||{},sr=sig.sr;
+    const rc=d.rsi>70?'dn':d.rsi>=50?'up':'dn';
+    h+=`<tr>
+      <td class="mono" style="font-weight:600">${sym}</td>
+      <td class="mono">${f(price)}</td><td class="mono">${fp(chg)}</td>
+      <td class="mono" style="color:var(--text2)">${f(+q.open)}</td>
+      <td class="mono up">${sr?f(sr.s1):'—'}</td>
+      <td class="mono" style="font-size:11px;color:var(--text2)">${sr?f(sr.s2):'—'}</td>
+      <td class="mono dn">${sr?f(sr.r1):'—'}</td>
+      <td class="mono" style="font-size:11px;color:var(--text2)">${sr?f(sr.r2):'—'}</td>
+      <td class="mono" style="font-size:11px;color:var(--text2)">${sr?.atr?.toFixed(2)||'—'}</td>
+      <td style="font-size:11px;color:var(--text2)">${d.ema||'—'}</td>
+      <td class="mono ${rc}">${d.rsi!=null?d.rsi.toFixed(1):'—'}</td>
+      <td><div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;background:${sig.s>=70?'var(--gbg)':sig.s>=45?'var(--abg)':'var(--rbg)'};color:${sig.s>=70?'var(--green)':sig.s>=45?'var(--amber)':'var(--red)'}">${sig.s}</div></td>
+      <td><span class="badge ${TM[sig.type]}">${TL[sig.type]}</span></td>
+      <td>${srcBadge(q.source)}</td>
+    </tr>`;
+  });
+  document.getElementById('fullTable').innerHTML=h||
+    '<tr><td colspan="14" style="text-align:center;color:var(--text2)">No data</td></tr>';
+}
+
+function renderTicker(){
+  let h='';
+  ALL.forEach(sym=>{
+    const q=px[sym]; if(!q) return;
+    const chg=+(q.change_p||0);
+    h+=`<span class="ticker-item"><span class="sym">${sym}</span><span class="${chg>=0?'up':'dn'}">${f(+q.close)} ${chg>=0?'▲':'▼'}${Math.abs(chg).toFixed(2)}%</span></span>`;
+  });
+  if(h) document.getElementById('tkr').innerHTML=h+h;
+}
+
+function renderCards(){
+  ['NVDA','GOOG'].forEach(sym=>{
+    const q=px[sym]; if(!q) return;
+    const el=document.getElementById('cq-'+sym), s=document.getElementById('cs-'+sym);
+    if(el) el.textContent=f(+q.close);
+    if(s)  s.innerHTML=fp(+(q.change_p||0));
+  });
+}
+
+function renderGrowth(){
+  const SL={'strong-buy':'⚡ STRONG BUY','buy':'▲ BUY','watch':'◎ WATCH','hold':'— HOLD','avoid':'✕ AVOID'};
+  const SC={'strong-buy':'bu','buy':'bu','watch':'bi','hold':'bn','avoid':'bd'};
+  let h='';
+  GRW.forEach(sym=>{
+    const q=px[sym]; if(!q) return;
+    const chg=+(q.change_p||0),price=+q.close,sr=SR[sym],sig=sigs[sym],st=sig?.type||'hold';
+    h+=`<tr>
+      <td class="mono" style="font-weight:600">${sym}</td>
+      <td class="mono">${f(price)}</td><td class="mono">${fp(chg)}</td>
+      <td style="font-size:12px;color:var(--text2)">${TH[sym]||'—'}</td>
+      <td class="mono up">${sr?f(sr.s1):'—'}</td>
+      <td class="mono" style="font-size:11px;color:var(--text2)">${sr?f(sr.s2):'—'}</td>
+      <td class="mono dn">${sr?f(sr.r1):'—'}</td>
+      <td class="mono" style="font-size:11px;color:var(--text2)">${sr?f(sr.r2):'—'}</td>
+      <td class="mono" style="font-size:11px;color:var(--text2)">${sr?.atr?.toFixed(2)||'—'}</td>
+      <td><span class="badge ${SC[st]}">${SL[st]}</span></td>
+      <td>${srcBadge(q.source)}</td>
+    </tr>`;
+  });
+  document.getElementById('grTable').innerHTML=h||
+    '<tr><td colspan="11" style="text-align:center;padding:14px;color:var(--text2)">No data</td></tr>';
+}
+
+function renderQQQ(){
+  const q=px['NVDA']||px['GOOG']; if(!q) return;
+  const price=+q.close,chg=+(q.change_p||0);
+  const safe=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  const safeH=(id,v)=>{const e=document.getElementById(id);if(e)e.innerHTML=v;};
+  safe('qqq-p',f(price)); safeH('qqq-c',fp(chg));
+  const mp=Math.round(price*0.99/5)*5;
+  safe('mp-v','$'+mp); safe('mp-s',`$${(price-mp).toFixed(2)} above pain`);
+  const base=Math.round(price/5)*5, stk=[-3,-2,-1,0,1,2,3].map(i=>base+i*5);
+  safe('stk-r',`$${stk[0]}–$${stk[stk.length-1]}`);
+  const cOI=stk.map(s=>Math.round(Math.max(5,280-Math.abs(s-price)*12+(s>price?(s-price)*3:0))));
+  const pOI=stk.map(s=>Math.round(Math.max(5,200-Math.abs(s-price)*10+(s<price?Math.abs(s-price)*4:0))));
+  const mx=Math.max(...cOI,...pOI); let h='';
+  stk.forEach((s,i)=>{
+    const atm=s===base;
+    h+=`<div style="text-align:center">
+      <div class="hc" style="background:var(--gbg);opacity:${.2+cOI[i]/mx*.8};color:var(--green)">${cOI[i]}K</div>
+      <div style="font-size:9px;color:${atm?'var(--accent)':'var(--text2)'};padding:2px 0;font-weight:${atm?600:400}">$${s}${atm?' ◆':''}</div>
+      <div class="hc" style="background:var(--rbg);opacity:${.2+pOI[i]/mx*.8};color:var(--red)">${pOI[i]}K</div>
+    </div>`;
+  });
+  safeH('oi-hm',h);
+  const tC=cOI.reduce((a,b)=>a+b,0),tP=pOI.reduce((a,b)=>a+b,0),pcr=(tP/tC).toFixed(2);
+  safe('pcr-v',pcr);
+  const pb=document.getElementById('pcr-b');
+  if(pb){
+    if(pcr<0.7){pb.className='badge bu';pb.textContent='Bullish lean';}
+    else if(pcr>1.1){pb.className='badge bd';pb.textContent='Bearish lean';}
+    else{pb.className='badge bn';pb.textContent='Neutral';}
+  }
+}
+
+function renderAll(){
+  SIG.forEach(sym=>{const q=px[sym];if(!q)return;sigs[sym]=score(sym,+q.close,+(q.change_p||0));});
+  renderTicker();renderCards();renderSigs();renderFullTable();renderGrowth();renderQQQ();
+}
+
+// ── NAV ───────────────────────────────────────────────────────────
+function filt(t,b){
+  af=t;
+  document.querySelectorAll('.fb').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  renderSigs();
+}
+function sw(id){
+  const ids=['signals','ta','news','earnings','bigmoney','options','growth','smc'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',ids[i]===id));
+  document.querySelectorAll('.tc').forEach(c=>c.classList.toggle('active',c.id==='tab-'+id));
+  if(id==='news'&&!newsLoaded.length) loadNews();
+  if(id==='smc'&&!smcData[currentSMCSym]) loadSMC(currentSMCSym,null);
+  if(id==='bigmoney'&&!bmData[currentBMSym]) loadBigMoney('NVDA',null);
+  if(id==='options') loadORB('NVDA',null);
+}
+
+// ── NEWS ──────────────────────────────────────────────────────────
+async function loadNews(){
+  const feed=document.getElementById('newsFeed'), stat=document.getElementById('nstat');
+  feed.innerHTML='<div class="nl">⏳ Fetching news…</div>';
+  stat.textContent='fetching…'; stat.style.color='var(--text2)';
+  try{
+    const url=ncat==='general'?`${API}/api/news?category=general`:`${API}/api/company-news?symbol=${ncat}`;
+    const r=await fetch(url);
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const j=await r.json();
+    const arts=j.articles||[];
+    if(!arts.length) throw new Error('No articles');
+    newsLoaded=arts;
+    feed.innerHTML=arts.map(a=>{
+      const t=a.datetime?ago(a.datetime):'Today';
+      const src=(a.source||'').replace(/^https?:\/\//,'').split('/')[0]||'News';
+      const img=a.image?`<img class="nthumb" src="${a.image}" onerror="this.style.display='none'" loading="lazy">`:'<div class="nph">📰</div>';
+      return `<div class="ni">${img}<div style="flex:1;min-width:0">
+        <div class="nsrc">${src}</div>
+        <div class="ntitle"><a href="${a.url||'#'}" target="_blank" rel="noopener">${a.headline||'No title'}</a></div>
+        ${a.summary?`<div class="nsnip">${a.summary}</div>`:''}
+        <div class="nmeta"><span>${t}</span></div>
+      </div></div>`;
+    }).join('');
+    stat.textContent=`✓ ${arts.length} articles · ${j.source}`; stat.style.color='var(--green)';
+    const b=document.getElementById('nbadge'); if(b){b.textContent=arts.length;b.style.display='inline';}
+  }catch(e){
+    stat.textContent='⚠ '+e.message; stat.style.color='var(--red)';
+    feed.innerHTML=`<div class="nl" style="color:var(--red)">⚠ ${e.message}</div>`;
+  }
+}
+function switchNews(cat,label,btn){
+  ncat=cat;
+  const el=document.getElementById('nlabel'); if(el) el.textContent=label+' News';
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); loadNews();
+}
+function briefNews(){
+  const b=document.getElementById('ai-news'); b.className='aibox on ld'; b.textContent='Analyzing…';
+  const hl=newsLoaded.slice(0,10).map(a=>a.headline).filter(Boolean).join(' | ');
+  if(!hl){b.className='aibox on';b.textContent='Load news first.';return;}
+  callAI(`Headlines: ${hl}\n\nTop 5 market themes for NVDA and GOOG. Direct, actionable bullets.`,'ai-news');
+}
+
+// ── AI ────────────────────────────────────────────────────────────
+async function callAI(prompt,boxId){
+  const box=document.getElementById(boxId);
+  const n=px['NVDA'],g=px['GOOG'];
+  const ctx=n?`\nLive: NVDA ${f(+n.close)} (${(+(n.change_p||0)).toFixed(2)}%), GOOG ${g?f(+g.close):'n/a'}`:'';
+  const srCtx=Object.entries(SR).map(([s,d])=>`${s} S1=${f(d.s1)} R1=${f(d.r1)}`).join(', ');
+  const system=`Market analyst. Under 200 words. Bullets. Today ${new Date().toLocaleDateString()}.${ctx}${srCtx?' S/R:'+srCtx:''}`;
+  try{
+    const r=await fetch(`${API}/api/ai`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt,system,max_tokens:1000})
+    });
+    if(!r.ok){
+      const err=await r.json().catch(()=>({}));
+      const d=err.detail||err.error||{};
+      if(typeof d==='object'&&d.fix){box.className='aibox on';box.textContent=`⚠ ${d.error}\n${d.fix}`;return;}
+      throw new Error(JSON.stringify(d).slice(0,150));
+    }
+    const d=await r.json();
+    box.className='aibox on'; box.textContent=d.text||'No response.';
+  }catch(e){
+    box.className='aibox on';
+    box.textContent=`⚠ ${e.message}\n\nCheck: python server.py running + ANTHROPIC_API_KEY in .env`;
+  }
+}
+
+const PROMPTS={
+  signals:v=>{
+    const top=SIG.filter(s=>px[s]).map(s=>{
+      const sig=sigs[s]||{s:0,type:'?'},sr=SR[s],ta=TA[s]||{};
+      return `${s}(${sig.s},${sig.type},${f(+px[s].close)},RSI:${ta.rsi||'?'},EMA:${ta.ema||'?'},S1:${sr?f(sr.s1):'?'},R1:${sr?f(sr.r1):'?'})`;
+    }).join(', ');
+    return v||`Signals: ${top}. Best R/R setup? Entry, stop, target.`;
+  },
+  ta:      v=>v||'Technical analysis NVDA and GOOG — EMA, MACD, RSI, ATR. Entry/stop/target.',
+  news:    ()=>'Summarize today market themes in 5 bullets. Focus on NVDA and GOOG.',
+  earnings:v=>v||'Upcoming earnings — key expectations and trade setup.',
+  bigmoney:v=>{
+    const d=bmData[currentBMSym];
+    if(!d) return v||`${currentBMSym} options flow — PCR, max pain, unusual sweeps. Bullish or bearish?`;
+    return v||`${currentBMSym}: PCR=${d.pcr.volume_pcr.toFixed(2)} (${d.pcr_signal}), MaxPain=$${d.max_pain.max_pain}, IV=${d.iv.iv_rank}% (${d.iv.iv_label}), flow=${d.flow_summary.bias}. Interpret for a trade idea.`;
+  },
+  options:v=>{
+    const d=orbData[currentORBSym];
+    if(!d) return v||`${currentORBSym} ORB signal — entry, stop, target. Delta 0.45-0.55.`;
+    const sig=d.signal,orb=d.orb,cur=d.current,bs=d.options?.best_strike;
+    return v||`${currentORBSym} ORB $${orb.low}-$${orb.high}. Signal:${sig.direction}. Price $${cur.price} VWAP $${cur.vwap} EMA9 $${cur.ema9}. ${sig.direction!=='NONE'?`Entry $${sig.entry_price} Stop $${sig.stop_price} Target $${sig.target_price}.`:''} ${bs?`Strike: ${bs.direction} $${bs.strike} Δ${bs.delta}.`:''} Valid?`;
+  },
+  growth:  v=>v||'NVDA and GOOG growth outlook — catalyst, valuation, 12m target.',
+  smc:v=>{
+    const d=smcData[currentSMCSym];
+    if(!d) return v||`${currentSMCSym} SMC analysis — FVG, order block, structure bias.`;
+    return v||`${currentSMCSym} SMC: $${d.price}, bias=${d.choch.bias}, score=${d.smc_score}/100. FVGs:${d.fvg.bullish.length}bull/${d.fvg.bearish.length}bear, OBs:${d.order_block.bullish.length}bull. Valid entry?`;
+  },
+};
+const INS={signals:'sigin',ta:'tain',news:null,earnings:'earnin',bigmoney:'bmin',options:'optin',growth:'grin'};
+const BOX={signals:'ai-signals',ta:'ai-ta',news:'ai-news',earnings:'ai-earnings',bigmoney:'ai-bigmoney',options:'ai-options',growth:'ai-growth',smc:'ai-smc'};
+
+function ask(q){
+  document.querySelectorAll('.aibox').forEach(b=>{
+    if(b.offsetParent!==null){b.className='aibox on ld';b.textContent='Analyzing…';callAI(q,b.id);}
+  });
+}
+async function runAI(tab){
+  const inEl=INS[tab]?document.getElementById(INS[tab]):null;
+  const val=inEl?inEl.value.trim():'';
+  const boxId=BOX[tab]||('ai-'+tab);
+  const box=document.getElementById(boxId); if(!box) return;
+  box.className='aibox on ld'; box.textContent='Analyzing…';
+  callAI(PROMPTS[tab]?PROMPTS[tab](val):'Analyze this.',boxId);
+}
+
+// ── SMC FUNCTIONS ─────────────────────────────────────────────────────────
+async function loadSMC(sym, btn){
+  currentSMCSym = sym;
+  document.querySelectorAll('#smc-sym-row .fb').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+
+  const content = document.getElementById('smc-content');
+  content.innerHTML = '<div class="nl">⏳ Computing SMC concepts for '+sym+' from EODHD 120-day history…</div>';
+
+  // Reset summary cards
+  ['smc-score-val','smc-bias','smc-fvg-val','smc-ob-val'].forEach(id=>{
+    document.getElementById(id).textContent='—';
+  });
+
+  try{
+    const ck = `smc:${sym}`;
+    if(smcData[sym]){
+      renderSMC(sym, smcData[sym]); return;
+    }
+    const r = await fetch(`${API}/api/smc?symbol=${sym}`);
+    if(!r.ok) throw new Error(`Server HTTP ${r.status}`);
+    const j = await r.json();
+    if(j.error) throw new Error(j.error);
+    smcData[sym] = j.data;
+    renderSMC(sym, j.data);
+  }catch(e){
+    content.innerHTML = `<div class="nl" style="color:var(--red)">⚠ ${e.message}<br><span style="font-size:11px;color:var(--text2);margin-top:6px;display:block">Ensure Python server is running: <code>python server.py</code></span></div>`;
+  }
+}
+
+function smcBadge(type){
+  const bull = ['BOS_BULL','CHOCH_BULL','BULL_SWEEP','accumulation','bullish'];
+  const bear = ['BOS_BEAR','CHOCH_BEAR','BEAR_SWEEP','distribution','bearish'];
+  const isBull = bull.some(b=>type.includes(b)||type===b);
+  const isBear = bear.some(b=>type.includes(b)||type===b);
+  if(isBull) return '<span class="badge bu">BULLISH</span>';
+  if(isBear) return '<span class="badge bd">BEARISH</span>';
+  return '<span class="badge bn">NEUTRAL</span>';
+}
+
+function renderSMC(sym, d){
+  const price = d.price;
+
+  // ── Summary cards ──────────────────────────────────────────────────────
+  const scoreEl = document.getElementById('smc-score-val');
+  scoreEl.textContent = d.smc_score;
+  scoreEl.style.color = d.smc_score>=65?'var(--green)':d.smc_score>=40?'var(--amber)':'var(--red)';
+  document.getElementById('smc-score-lbl').textContent = d.smc_signals.slice(0,2).join(' · ')||'No confluence';
+
+  const biasEl = document.getElementById('smc-bias');
+  biasEl.textContent = d.choch.bias.toUpperCase();
+  biasEl.style.color = d.choch.bias==='bullish'?'var(--green)':d.choch.bias==='bearish'?'var(--red)':'var(--text2)';
+  document.getElementById('smc-bias-lbl').textContent = d.choch.latest ? d.choch.latest.desc : 'No recent structure';
+
+  const fvgBull = d.fvg.bullish.length, fvgBear = d.fvg.bearish.length;
+  document.getElementById('smc-fvg-val').textContent = `${fvgBull}B / ${fvgBear}S`;
+  document.getElementById('smc-fvg-lbl').textContent = d.fvg.nearest_bull
+    ? `Nearest: $${d.fvg.nearest_bull.bottom}–$${d.fvg.nearest_bull.top}`
+    : 'No active FVGs';
+
+  const obBull = d.order_block.bullish.length, obBear = d.order_block.bearish.length;
+  document.getElementById('smc-ob-val').textContent = `${obBull}B / ${obBear}S`;
+  document.getElementById('smc-ob-lbl').textContent = d.order_block.nearest_bull
+    ? `Nearest: $${d.order_block.nearest_bull.bottom}–$${d.order_block.nearest_bull.top}`
+    : 'No active OBs';
+
+  // ── Main content ───────────────────────────────────────────────────────
+  let html = `<div style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:12px">
+    ${sym} @ $${price} · ${d.bars} bars (${d.dates.first} → ${d.dates.last}) · Source: ${d.source}
+  </div>`;
+
+  // ── 1. Fair Value Gap ──────────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">⚡ Fair Value Gap (FVG) — 3-candle imbalance zones</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">
+      Price moved so fast it left an untested range. These zones act as magnets —
+      price often returns to "fill" the gap. Best entry: buy into bullish FVG, sell into bearish FVG.
+    </p>`;
+
+  if(d.fvg.bullish.length===0 && d.fvg.bearish.length===0){
+    html += `<div style="color:var(--text2);font-size:12px;padding:8px 0">No active unfilled FVGs found in last 60 candles.</div>`;
+  } else {
+    html += `<div class="tw"><table><thead><tr>
+      <th>Direction</th><th>Zone Bottom</th><th>Zone Top</th><th>Mid</th><th>Gap %</th><th>Status</th><th>Signal</th>
+    </tr></thead><tbody>`;
+    [...d.fvg.bullish.map(f=>({...f,dir:'bullish'})),
+     ...d.fvg.bearish.map(f=>({...f,dir:'bearish'}))
+    ].sort((a,b)=>b.idx-a.idx).forEach(fvg=>{
+      const inZone = fvg.dir==='bullish'
+        ? (price>=fvg.bottom && price<=fvg.top)
+        : (price>=fvg.bottom && price<=fvg.top);
+      const highlight = inZone ? 'background:var(--gbg)' : '';
+      const action = fvg.dir==='bullish'
+        ? `Buy retest of $${fvg.bottom}–$${fvg.mid}`
+        : `Sell retest of $${fvg.mid}–$${fvg.top}`;
+      html += `<tr style="${highlight}">
+        <td>${fvg.dir==='bullish'?'<span class="badge bu">▲ BULL FVG</span>':'<span class="badge bd">▼ BEAR FVG</span>'}</td>
+        <td class="mono up">$${fvg.bottom}</td>
+        <td class="mono dn">$${fvg.top}</td>
+        <td class="mono">$${fvg.mid}</td>
+        <td class="mono">${fvg.gap_pct}%</td>
+        <td>${inZone?'<span class="badge bw">⚡ IN ZONE</span>':'<span class="badge bn">Open</span>'}</td>
+        <td style="font-size:11px;color:var(--text2)">${action}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div>`;
+
+  // ── 2. Order Block ─────────────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">🧱 Order Block — institutional entry zones</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">
+      The last opposing candle before a strong impulse move — where institutions entered.
+      Bullish OB: last bearish candle before a strong up-move. Price retesting the OB = high-prob long entry.
+    </p>`;
+
+  const allOBs = [
+    ...d.order_block.bullish.map(o=>({...o,dir:'bullish'})),
+    ...d.order_block.bearish.map(o=>({...o,dir:'bearish'}))
+  ].sort((a,b)=>b.idx-a.idx);
+
+  if(allOBs.length===0){
+    html += `<div style="color:var(--text2);font-size:12px;padding:8px 0">No unbroken order blocks found.</div>`;
+  } else {
+    html += `<div class="tw"><table><thead><tr>
+      <th>Direction</th><th>OB Bottom</th><th>OB Top</th><th>Mid</th><th>Impulse</th><th>Status</th><th>Action</th>
+    </tr></thead><tbody>`;
+    allOBs.forEach(ob=>{
+      const inZone = price>=ob.bottom && price<=ob.top;
+      const hl = inZone?'background:var(--gbg)':'';
+      const action = ob.dir==='bullish'
+        ? `Long entry at $${ob.mid}, stop below $${ob.bottom}`
+        : `Short entry at $${ob.mid}, stop above $${ob.top}`;
+      html += `<tr style="${hl}">
+        <td>${ob.dir==='bullish'?'<span class="badge bu">▲ BULL OB</span>':'<span class="badge bd">▼ BEAR OB</span>'}</td>
+        <td class="mono up">$${ob.bottom}</td>
+        <td class="mono dn">$${ob.top}</td>
+        <td class="mono">$${ob.mid}</td>
+        <td class="mono" style="color:var(--amber)">${ob.impulse>=0?'+':''}${ob.impulse}%</td>
+        <td>${ob.tested?'<span class="badge bw">⚡ TESTING</span>':inZone?'<span class="badge bw">⚡ IN ZONE</span>':'<span class="badge bn">Unbroken</span>'}</td>
+        <td style="font-size:11px;color:var(--text2)">${action}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div>`;
+
+  // ── 3. Change of Character / Break of Structure ────────────────────────
+  html += `<div class="card">
+    <div class="ct">📐 Change of Character (CHoCH) & Break of Structure (BoS)</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">
+      <strong style="color:var(--text)">BoS</strong> = trend continuation (higher high in uptrend / lower low in downtrend).
+      <strong style="color:var(--text)">CHoCH</strong> = trend reversal signal — structure flipped.
+      Current bias: <strong style="color:${d.choch.bias==='bullish'?'var(--green)':d.choch.bias==='bearish'?'var(--red)':'var(--text2)'}">${d.choch.bias.toUpperCase()}</strong>
+    </p>`;
+
+  if(d.choch.events.length===0){
+    html += `<div style="color:var(--text2);font-size:12px;padding:8px 0">No structure events detected.</div>`;
+  } else {
+    html += `<div class="tw"><table><thead><tr>
+      <th>Event</th><th>Type</th><th>Level</th><th>Bias</th><th>Description</th>
+    </tr></thead><tbody>`;
+    d.choch.events.forEach((ev,i)=>{
+      const isChoch = ev.type.includes('CHOCH');
+      const isBull  = ev.bias==='bullish';
+      const typeTag = isChoch
+        ? (isBull?'<span class="badge bu">CHoCH ↑</span>':'<span class="badge bd">CHoCH ↓</span>')
+        : (isBull?'<span class="badge bi">BoS ↑</span>':'<span class="badge bn">BoS ↓</span>');
+      const latest = i===0 ? 'font-weight:600' : 'opacity:0.7';
+      html += `<tr style="${latest}">
+        <td style="font-size:11px;color:var(--text2)">${i===0?'Latest':''}</td>
+        <td>${typeTag}</td>
+        <td class="mono">$${ev.level}</td>
+        <td>${smcBadge(ev.bias)}</td>
+        <td style="font-size:11px;color:var(--text2)">${ev.desc}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div>`;
+
+  // ── 4. Liquidity Sweep ────────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">💧 Liquidity Sweep — stop hunt zones</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">
+      Price spikes through a swing level (grabbing stops) then reverses sharply.
+      Bullish sweep: wicks below prior lows, closes back above — longs now fueled by trapped shorts.
+      Bearish sweep: wicks above prior highs, closes back below — shorts now fueled by trapped longs.
+    </p>`;
+
+  if(d.liquidity.sweeps.length===0){
+    html += `<div style="color:var(--text2);font-size:12px;padding:8px 0">No significant liquidity sweeps found in recent data.</div>`;
+  } else {
+    html += `<div class="tw"><table><thead><tr>
+      <th>Direction</th><th>Swept Level</th><th>Wick Extreme</th><th>Close</th><th>Depth</th><th>Signal</th>
+    </tr></thead><tbody>`;
+    d.liquidity.sweeps.forEach(sw=>{
+      const isBull = sw.type==='BULL_SWEEP';
+      html += `<tr>
+        <td>${isBull?'<span class="badge bu">▲ BULL SWEEP</span>':'<span class="badge bd">▼ BEAR SWEEP</span>'}</td>
+        <td class="mono">$${sw.swept_level}</td>
+        <td class="mono" style="color:${isBull?'var(--red)':'var(--green)'}">$${sw.wick_extreme}</td>
+        <td class="mono">$${sw.close}</td>
+        <td class="mono" style="color:var(--amber)">${sw.depth_pct}%</td>
+        <td style="font-size:11px;color:var(--text2)">${sw.signal}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div>`;
+
+  // ── 5. Volume Base ────────────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">📦 Volume Base — institutional accumulation / distribution zones</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">
+      Tight consolidation with above-average volume = institutions quietly building positions.
+      Accumulation = smart money buying. Distribution = smart money selling.
+      Price retesting these zones often offers high-probability entries.
+    </p>`;
+
+  if(d.volume_base.bases.length===0){
+    html += `<div style="color:var(--text2);font-size:12px;padding:8px 0">No significant volume bases found.</div>`;
+  } else {
+    html += `<div class="tw"><table><thead><tr>
+      <th>Type</th><th>Zone</th><th>Mid</th><th>Vol Ratio</th><th>Candles</th><th>Status</th><th>Signal</th>
+    </tr></thead><tbody>`;
+    d.volume_base.bases.forEach(vb=>{
+      const inZone = vb.price_in_zone;
+      const hl = inZone?'background:var(--gbg)':'';
+      html += `<tr style="${hl}">
+        <td>${vb.type==='accumulation'?'<span class="badge bu">▲ ACCUM</span>':'<span class="badge bd">▼ DISTRIB</span>'}</td>
+        <td class="mono">$${vb.bottom} – $${vb.top}</td>
+        <td class="mono">$${vb.mid}</td>
+        <td class="mono" style="color:var(--amber)">${vb.vol_ratio}x</td>
+        <td class="mono">${vb.candles}</td>
+        <td>${inZone?'<span class="badge bw">⚡ IN ZONE</span>':'<span class="badge bn">Watch</span>'}</td>
+        <td style="font-size:11px;color:var(--text2)">${vb.signal}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div>`;
+
+  // ── SMC Confluence summary ─────────────────────────────────────────────
+  if(d.smc_signals.length > 0){
+    html += `<div class="card" style="background:${d.smc_score>=65?'var(--gbg)':d.smc_score>=40?'var(--abg)':'var(--rbg)'}">
+      <div class="ct">✦ SMC Confluence Summary</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        ${d.smc_signals.map(s=>`<span class="badge bu">${s}</span>`).join('')}
+      </div>
+      <div style="font-size:12px;color:var(--text2)">
+        SMC Score: <strong style="color:var(--text);font-size:16px;font-family:'JetBrains Mono',monospace">${d.smc_score}/100</strong>
+        — ${d.smc_score>=65?'Strong bullish confluence — multiple SMC factors aligning':
+            d.smc_score>=40?'Moderate confluence — watch for confirmation':
+            'Weak / bearish SMC setup — caution'}
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('smc-content').innerHTML = html;
+}
+
+
+
+// ── BIG MONEY FUNCTIONS ───────────────────────────────────────────────────
+async function loadBigMoney(sym, btn){
+  currentBMSym = sym;
+  document.querySelectorAll('#bm-sym-row .fb').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+
+  const content = document.getElementById('bm-content');
+  content.innerHTML = '<div class="nl">⏳ Fetching real options flow for '+sym+' via yfinance…</div>';
+
+  // Reset summary cards
+  ['bm-pcr','bm-mp','bm-iv','bm-flow'].forEach(id=>{
+    document.getElementById(id).textContent='—';
+  });
+  ['bm-pcr-lbl','bm-mp-lbl','bm-iv-lbl','bm-flow-lbl'].forEach(id=>{
+    document.getElementById(id).textContent='Loading…';
+  });
+
+  if(bmData[sym]){ renderBigMoney(sym, bmData[sym]); return; }
+
+  try{
+    const r = await fetch(`${API}/api/bigmoney?symbol=${sym}`);
+    if(!r.ok) throw new Error(`Server HTTP ${r.status}`);
+    const j = await r.json();
+    if(j.error) throw new Error(j.error);
+    bmData[sym] = j.data;
+    renderBigMoney(sym, j.data);
+  }catch(e){
+    content.innerHTML = `<div class="nl" style="color:var(--red)">⚠ ${e.message}<br>
+      <span style="font-size:11px;color:var(--text2);margin-top:6px;display:block">
+        Options data via yfinance — ensure Python server is running: <code>python server.py</code>
+      </span></div>`;
+    ['bm-pcr-lbl','bm-mp-lbl','bm-iv-lbl','bm-flow-lbl'].forEach(id=>{
+      document.getElementById(id).textContent='Error';
+    });
+  }
+}
+
+function fmtM(v){
+  if(v>=1e9) return '$'+( v/1e9).toFixed(2)+'B';
+  if(v>=1e6) return '$'+(v/1e6).toFixed(1)+'M';
+  if(v>=1e3) return '$'+(v/1e3).toFixed(0)+'K';
+  return '$'+v;
+}
+
+function renderBigMoney(sym, d){
+  const price  = d.price;
+  const pcr    = d.pcr;
+  const mp     = d.max_pain;
+  const iv     = d.iv;
+  const flow   = d.flow_summary;
+  const unusual= d.unusual;
+
+  // ── Summary cards ──────────────────────────────────────────────────────
+  const pcrEl = document.getElementById('bm-pcr');
+  pcrEl.textContent = pcr.volume_pcr.toFixed(2);
+  pcrEl.style.color = pcr.pcr_bias==='bullish'?'var(--green)':pcr.pcr_bias==='bearish'?'var(--red)':'var(--text2)';
+  document.getElementById('bm-pcr-lbl').innerHTML =
+    `<span class="badge ${pcr.pcr_bias==='bullish'?'bu':pcr.pcr_bias==='bearish'?'bd':'bn'}">${d.pcr_signal}</span>`;
+
+  document.getElementById('bm-mp').textContent = '$'+mp.max_pain;
+  document.getElementById('bm-mp-lbl').textContent =
+    `${mp.dist_pct>=0?'+':''}${mp.dist_pct}% from price · pin risk`;
+
+  const ivEl = document.getElementById('bm-iv');
+  ivEl.textContent = iv.iv_rank!=null ? iv.iv_rank+'%' : iv.iv_current+'%';
+  ivEl.style.color = iv.iv_rank>70?'var(--red)':iv.iv_rank<30?'var(--green)':'var(--amber)';
+  document.getElementById('bm-iv-lbl').textContent = iv.iv_label||'—';
+
+  const flowEl = document.getElementById('bm-flow');
+  flowEl.textContent = flow.bias.toUpperCase();
+  flowEl.style.color = flow.bias==='bullish'?'var(--green)':flow.bias==='bearish'?'var(--red)':'var(--text2)';
+  document.getElementById('bm-flow-lbl').textContent =
+    `${fmtM(flow.bull_notional)} calls vs ${fmtM(flow.bear_notional)} puts`;
+
+  // ── Main content ───────────────────────────────────────────────────────
+  let html = `<div style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:12px">
+    ${sym} @ $${price} · Expiries: ${(d.expiries||[]).join(', ')} · Source: ${d.source}
+  </div>`;
+
+  // ── 1. Put/Call Analysis ───────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">📊 Put/Call Analysis</div>
+    <div class="g4" style="margin-bottom:0">
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Volume PCR</div>
+        <div class="mono" style="font-size:18px;color:${pcr.pcr_bias==='bullish'?'var(--green)':pcr.pcr_bias==='bearish'?'var(--red)':'var(--text2)'}">${pcr.volume_pcr.toFixed(3)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${d.pcr_signal}</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">OI PCR</div>
+        <div class="mono" style="font-size:18px;color:var(--text)">${pcr.oi_pcr.toFixed(3)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Open interest ratio</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Call volume</div>
+        <div class="mono up" style="font-size:18px">${pcr.total_call_vol.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${pcr.call_pct}% of total</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Put volume</div>
+        <div class="mono dn" style="font-size:18px">${pcr.total_put_vol.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${pcr.put_pct}% of total</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding:8px 12px;background:${pcr.pcr_bias==='bullish'?'var(--gbg)':pcr.pcr_bias==='bearish'?'var(--rbg)':'var(--bg3)'};border-radius:var(--r2);font-size:12px;color:var(--text2)">
+      <strong style="color:var(--text)">Interpretation:</strong>
+      PCR < 0.7 = bullish (more calls than puts = market expects upside).
+      PCR > 1.2 = bearish (heavy put buying = hedging or directional short).
+      Current: <strong style="color:${pcr.pcr_bias==='bullish'?'var(--green)':pcr.pcr_bias==='bearish'?'var(--red)':'var(--text)'}">${d.pcr_signal}</strong>
+    </div>
+  </div>`;
+
+  // ── 2. Max Pain + OI Heatmap ──────────────────────────────────────────
+  const topStrikes = mp.top_strikes || [];
+  const maxOI = Math.max(...topStrikes.map(s=>s.total_oi), 1);
+  html += `<div class="card">
+    <div class="ct">🎯 Max Pain — OI Heatmap by Strike</div>
+    <div style="margin-bottom:10px;font-size:12px;color:var(--text2);line-height:1.6">
+      Max Pain = <strong style="color:var(--text);font-family:'JetBrains Mono',monospace">$${mp.max_pain}</strong>
+      &nbsp;·&nbsp; Current price = <strong style="color:var(--accent);font-family:'JetBrains Mono',monospace">$${price}</strong>
+      &nbsp;·&nbsp; Distance = <strong style="color:${mp.dist_pct>=0?'var(--red)':'var(--green)'}">
+        ${mp.dist_pct>=0?'+':''}${mp.dist_pct}%</strong>
+      &nbsp;·&nbsp; <span style="color:var(--amber)">Pin risk: price may gravitate toward $${mp.max_pain} at expiry</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:6px;font-size:11px;color:var(--text2)">
+      <span><span style="width:10px;height:10px;border-radius:2px;background:var(--gbg);border:1px solid var(--green);display:inline-block;vertical-align:middle;margin-right:3px"></span>Calls OI</span>
+      <span><span style="width:10px;height:10px;border-radius:2px;background:var(--rbg);border:1px solid var(--red);display:inline-block;vertical-align:middle;margin-right:3px"></span>Puts OI</span>
+      <span><span style="width:10px;height:10px;border-radius:2px;background:var(--abg);border:1px solid var(--amber);display:inline-block;vertical-align:middle;margin-right:3px"></span>Max Pain</span>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="min-width:600px"><thead><tr>
+      <th>Strike</th><th>Call OI</th><th>Put OI</th><th>Total OI</th><th>Calls bar</th><th>Puts bar</th><th>Tag</th>
+    </tr></thead><tbody>`;
+
+  topStrikes.forEach(s=>{
+    const isMP    = s.is_max_pain;
+    const isAtm   = Math.abs(s.strike - price) / price < 0.02;
+    const cBar    = Math.round(s.call_oi / maxOI * 100);
+    const pBar    = Math.round(s.put_oi  / maxOI * 100);
+    const rowStyle= isMP?'background:var(--abg)':isAtm?'background:var(--bbg)':'';
+    html += `<tr style="${rowStyle}">
+      <td class="mono" style="font-weight:${isMP||isAtm?600:400}">${s.strike}</td>
+      <td class="mono up">${s.call_oi.toLocaleString()}</td>
+      <td class="mono dn">${s.put_oi.toLocaleString()}</td>
+      <td class="mono">${s.total_oi.toLocaleString()}</td>
+      <td><div style="width:${cBar}%;min-width:2px;height:10px;background:var(--green);border-radius:2px;opacity:0.7"></div></td>
+      <td><div style="width:${pBar}%;min-width:2px;height:10px;background:var(--red);border-radius:2px;opacity:0.7"></div></td>
+      <td style="font-size:11px">
+        ${isMP?'<span class="badge bw">⚡ MAX PAIN</span>':''}
+        ${isAtm?'<span class="badge bi">ATM</span>':''}
+      </td>
+    </tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+
+  // ── 3. IV Rank ─────────────────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">📈 Implied Volatility (IV) Analysis</div>
+    <div class="g4" style="margin-bottom:10px">
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Current IV</div>
+        <div class="mono" style="font-size:18px;color:var(--text)">${iv.iv_current!=null?iv.iv_current+'%':'—'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Median from chain</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">IV Rank</div>
+        <div class="mono" style="font-size:18px;color:${iv.iv_rank>70?'var(--red)':iv.iv_rank<30?'var(--green)':'var(--amber)'}">${iv.iv_rank!=null?iv.iv_rank+'%':'—'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${iv.iv_label||'—'}</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">HV 20d</div>
+        <div class="mono" style="font-size:18px;color:var(--text)">${iv.hv_20d!=null?iv.hv_20d+'%':'—'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Historical vol</div>
+      </div>
+      <div style="padding:10px;background:${iv.iv_rank>70?'var(--rbg)':iv.iv_rank<30?'var(--gbg)':'var(--abg)'};border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Best strategy</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-top:4px;line-height:1.4">${iv.best_strategy||'—'}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // ── 4. Unusual Options Flow ────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">⚡ Unusual Options Flow — high volume / OI ratio</div>
+    <div style="margin-bottom:10px;font-size:12px;color:var(--text2);line-height:1.6">
+      These contracts have volume >> open interest — suggesting new institutional positioning, not just existing holders.
+      Bull notional: <strong class="up">${fmtM(flow.bull_notional)}</strong> (${flow.bull_pct}%) &nbsp;·&nbsp;
+      Bear notional: <strong class="dn">${fmtM(flow.bear_notional)}</strong> (${flow.bear_pct}%) &nbsp;·&nbsp;
+      Flow bias: <strong style="color:${flow.bias==='bullish'?'var(--green)':flow.bias==='bearish'?'var(--red)':'var(--text2)'}">${flow.bias.toUpperCase()}</strong>
+    </div>`;
+
+  if(unusual.length===0){
+    html += `<div style="color:var(--text2);font-size:12px;padding:8px 0">No unusual options activity detected.</div>`;
+  } else {
+    html += `<div class="tw"><table><thead><tr>
+      <th>Side</th><th>Strike</th><th>Expiry</th><th>Volume</th><th>OI</th><th>Vol/OI</th><th>Last</th><th>Notional</th><th>IV</th><th>Money</th><th>Bias</th>
+    </tr></thead><tbody>`;
+    unusual.forEach(u=>{
+      const isBull = u.bias==='BULL';
+      html += `<tr>
+        <td><span class="badge ${isBull?'bu':'bd'}">${u.side}</span></td>
+        <td class="mono">${u.strike}</td>
+        <td class="mono" style="font-size:11px">${u.expiry}</td>
+        <td class="mono" style="color:var(--amber)">${u.volume.toLocaleString()}</td>
+        <td class="mono" style="color:var(--text2)">${u.open_interest.toLocaleString()}</td>
+        <td class="mono" style="color:${u.vol_oi_ratio>5?'var(--green)':'var(--text2)'}">${u.vol_oi_ratio}x</td>
+        <td class="mono">$${u.last_price}</td>
+        <td class="mono" style="color:${isBull?'var(--green)':'var(--red)'};font-weight:600">${fmtM(u.notional)}</td>
+        <td class="mono" style="color:var(--text2)">${u.iv}%</td>
+        <td><span class="badge ${u.moneyness==='ITM'?'bu':u.moneyness==='ATM'?'bw':'bn'}">${u.moneyness}</span></td>
+        <td><span class="badge ${isBull?'bu':'bd'}">${u.bias}</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div>`;
+
+  document.getElementById('bm-content').innerHTML = html;
+}
+
+
+
+// ── BIG MONEY FUNCTIONS ───────────────────────────────────────────────────
+async function loadBigMoney(sym, btn){
+  currentBMSym = sym;
+  document.querySelectorAll('#bm-sym-row .fb').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+
+  const content = document.getElementById('bm-content');
+  content.innerHTML = '<div class="nl">⏳ Fetching real options flow for '+sym+' via yfinance…</div>';
+
+  // Reset summary cards
+  ['bm-pcr','bm-mp','bm-iv','bm-flow'].forEach(id=>{
+    document.getElementById(id).textContent='—';
+  });
+  ['bm-pcr-lbl','bm-mp-lbl','bm-iv-lbl','bm-flow-lbl'].forEach(id=>{
+    document.getElementById(id).textContent='Loading…';
+  });
+
+  if(bmData[sym]){ renderBigMoney(sym, bmData[sym]); return; }
+
+  try{
+    const r = await fetch(`${API}/api/bigmoney?symbol=${sym}`);
+    if(!r.ok) throw new Error(`Server HTTP ${r.status}`);
+    const j = await r.json();
+    if(j.error) throw new Error(j.error);
+    bmData[sym] = j.data;
+    renderBigMoney(sym, j.data);
+  }catch(e){
+    content.innerHTML = `<div class="nl" style="color:var(--red)">⚠ ${e.message}<br>
+      <span style="font-size:11px;color:var(--text2);margin-top:6px;display:block">
+        Options data via yfinance — ensure Python server is running: <code>python server.py</code>
+      </span></div>`;
+    ['bm-pcr-lbl','bm-mp-lbl','bm-iv-lbl','bm-flow-lbl'].forEach(id=>{
+      document.getElementById(id).textContent='Error';
+    });
+  }
+}
+
+function fmtM(v){
+  if(v>=1e9) return '$'+( v/1e9).toFixed(2)+'B';
+  if(v>=1e6) return '$'+(v/1e6).toFixed(1)+'M';
+  if(v>=1e3) return '$'+(v/1e3).toFixed(0)+'K';
+  return '$'+v;
+}
+
+function renderBigMoney(sym, d){
+  const price  = d.price;
+  const pcr    = d.pcr;
+  const mp     = d.max_pain;
+  const iv     = d.iv;
+  const flow   = d.flow_summary;
+  const unusual= d.unusual;
+
+  // ── Summary cards ──────────────────────────────────────────────────────
+  const pcrEl = document.getElementById('bm-pcr');
+  pcrEl.textContent = pcr.volume_pcr.toFixed(2);
+  pcrEl.style.color = pcr.pcr_bias==='bullish'?'var(--green)':pcr.pcr_bias==='bearish'?'var(--red)':'var(--text2)';
+  document.getElementById('bm-pcr-lbl').innerHTML =
+    `<span class="badge ${pcr.pcr_bias==='bullish'?'bu':pcr.pcr_bias==='bearish'?'bd':'bn'}">${d.pcr_signal}</span>`;
+
+  document.getElementById('bm-mp').textContent = '$'+mp.max_pain;
+  document.getElementById('bm-mp-lbl').textContent =
+    `${mp.dist_pct>=0?'+':''}${mp.dist_pct}% from price · pin risk`;
+
+  const ivEl = document.getElementById('bm-iv');
+  ivEl.textContent = iv.iv_rank!=null ? iv.iv_rank+'%' : iv.iv_current+'%';
+  ivEl.style.color = iv.iv_rank>70?'var(--red)':iv.iv_rank<30?'var(--green)':'var(--amber)';
+  document.getElementById('bm-iv-lbl').textContent = iv.iv_label||'—';
+
+  const flowEl = document.getElementById('bm-flow');
+  flowEl.textContent = flow.bias.toUpperCase();
+  flowEl.style.color = flow.bias==='bullish'?'var(--green)':flow.bias==='bearish'?'var(--red)':'var(--text2)';
+  document.getElementById('bm-flow-lbl').textContent =
+    `${fmtM(flow.bull_notional)} calls vs ${fmtM(flow.bear_notional)} puts`;
+
+  // ── Main content ───────────────────────────────────────────────────────
+  let html = `<div style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:12px">
+    ${sym} @ $${price} · Expiries: ${(d.expiries||[]).join(', ')} · Source: ${d.source}
+  </div>`;
+
+  // ── 1. Put/Call Analysis ───────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">📊 Put/Call Analysis</div>
+    <div class="g4" style="margin-bottom:0">
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Volume PCR</div>
+        <div class="mono" style="font-size:18px;color:${pcr.pcr_bias==='bullish'?'var(--green)':pcr.pcr_bias==='bearish'?'var(--red)':'var(--text2)'}">${pcr.volume_pcr.toFixed(3)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${d.pcr_signal}</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">OI PCR</div>
+        <div class="mono" style="font-size:18px;color:var(--text)">${pcr.oi_pcr.toFixed(3)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Open interest ratio</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Call volume</div>
+        <div class="mono up" style="font-size:18px">${pcr.total_call_vol.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${pcr.call_pct}% of total</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Put volume</div>
+        <div class="mono dn" style="font-size:18px">${pcr.total_put_vol.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${pcr.put_pct}% of total</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding:8px 12px;background:${pcr.pcr_bias==='bullish'?'var(--gbg)':pcr.pcr_bias==='bearish'?'var(--rbg)':'var(--bg3)'};border-radius:var(--r2);font-size:12px;color:var(--text2)">
+      <strong style="color:var(--text)">Interpretation:</strong>
+      PCR < 0.7 = bullish (more calls than puts = market expects upside).
+      PCR > 1.2 = bearish (heavy put buying = hedging or directional short).
+      Current: <strong style="color:${pcr.pcr_bias==='bullish'?'var(--green)':pcr.pcr_bias==='bearish'?'var(--red)':'var(--text)'}">${d.pcr_signal}</strong>
+    </div>
+  </div>`;
+
+  // ── 2. Max Pain + OI Heatmap ──────────────────────────────────────────
+  const topStrikes = mp.top_strikes || [];
+  const maxOI = Math.max(...topStrikes.map(s=>s.total_oi), 1);
+  html += `<div class="card">
+    <div class="ct">🎯 Max Pain — OI Heatmap by Strike</div>
+    <div style="margin-bottom:10px;font-size:12px;color:var(--text2);line-height:1.6">
+      Max Pain = <strong style="color:var(--text);font-family:'JetBrains Mono',monospace">$${mp.max_pain}</strong>
+      &nbsp;·&nbsp; Current price = <strong style="color:var(--accent);font-family:'JetBrains Mono',monospace">$${price}</strong>
+      &nbsp;·&nbsp; Distance = <strong style="color:${mp.dist_pct>=0?'var(--red)':'var(--green)'}">
+        ${mp.dist_pct>=0?'+':''}${mp.dist_pct}%</strong>
+      &nbsp;·&nbsp; <span style="color:var(--amber)">Pin risk: price may gravitate toward $${mp.max_pain} at expiry</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:6px;font-size:11px;color:var(--text2)">
+      <span><span style="width:10px;height:10px;border-radius:2px;background:var(--gbg);border:1px solid var(--green);display:inline-block;vertical-align:middle;margin-right:3px"></span>Calls OI</span>
+      <span><span style="width:10px;height:10px;border-radius:2px;background:var(--rbg);border:1px solid var(--red);display:inline-block;vertical-align:middle;margin-right:3px"></span>Puts OI</span>
+      <span><span style="width:10px;height:10px;border-radius:2px;background:var(--abg);border:1px solid var(--amber);display:inline-block;vertical-align:middle;margin-right:3px"></span>Max Pain</span>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="min-width:600px"><thead><tr>
+      <th>Strike</th><th>Call OI</th><th>Put OI</th><th>Total OI</th><th>Calls bar</th><th>Puts bar</th><th>Tag</th>
+    </tr></thead><tbody>`;
+
+  topStrikes.forEach(s=>{
+    const isMP    = s.is_max_pain;
+    const isAtm   = Math.abs(s.strike - price) / price < 0.02;
+    const cBar    = Math.round(s.call_oi / maxOI * 100);
+    const pBar    = Math.round(s.put_oi  / maxOI * 100);
+    const rowStyle= isMP?'background:var(--abg)':isAtm?'background:var(--bbg)':'';
+    html += `<tr style="${rowStyle}">
+      <td class="mono" style="font-weight:${isMP||isAtm?600:400}">${s.strike}</td>
+      <td class="mono up">${s.call_oi.toLocaleString()}</td>
+      <td class="mono dn">${s.put_oi.toLocaleString()}</td>
+      <td class="mono">${s.total_oi.toLocaleString()}</td>
+      <td><div style="width:${cBar}%;min-width:2px;height:10px;background:var(--green);border-radius:2px;opacity:0.7"></div></td>
+      <td><div style="width:${pBar}%;min-width:2px;height:10px;background:var(--red);border-radius:2px;opacity:0.7"></div></td>
+      <td style="font-size:11px">
+        ${isMP?'<span class="badge bw">⚡ MAX PAIN</span>':''}
+        ${isAtm?'<span class="badge bi">ATM</span>':''}
+      </td>
+    </tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+
+  // ── 3. IV Rank ─────────────────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">📈 Implied Volatility (IV) Analysis</div>
+    <div class="g4" style="margin-bottom:10px">
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Current IV</div>
+        <div class="mono" style="font-size:18px;color:var(--text)">${iv.iv_current!=null?iv.iv_current+'%':'—'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Median from chain</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">IV Rank</div>
+        <div class="mono" style="font-size:18px;color:${iv.iv_rank>70?'var(--red)':iv.iv_rank<30?'var(--green)':'var(--amber)'}">${iv.iv_rank!=null?iv.iv_rank+'%':'—'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${iv.iv_label||'—'}</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">HV 20d</div>
+        <div class="mono" style="font-size:18px;color:var(--text)">${iv.hv_20d!=null?iv.hv_20d+'%':'—'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Historical vol</div>
+      </div>
+      <div style="padding:10px;background:${iv.iv_rank>70?'var(--rbg)':iv.iv_rank<30?'var(--gbg)':'var(--abg)'};border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Best strategy</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);margin-top:4px;line-height:1.4">${iv.best_strategy||'—'}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // ── 4. Unusual Options Flow ────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">⚡ Unusual Options Flow — high volume / OI ratio</div>
+    <div style="margin-bottom:10px;font-size:12px;color:var(--text2);line-height:1.6">
+      These contracts have volume >> open interest — suggesting new institutional positioning, not just existing holders.
+      Bull notional: <strong class="up">${fmtM(flow.bull_notional)}</strong> (${flow.bull_pct}%) &nbsp;·&nbsp;
+      Bear notional: <strong class="dn">${fmtM(flow.bear_notional)}</strong> (${flow.bear_pct}%) &nbsp;·&nbsp;
+      Flow bias: <strong style="color:${flow.bias==='bullish'?'var(--green)':flow.bias==='bearish'?'var(--red)':'var(--text2)'}">${flow.bias.toUpperCase()}</strong>
+    </div>`;
+
+  if(unusual.length===0){
+    html += `<div style="color:var(--text2);font-size:12px;padding:8px 0">No unusual options activity detected.</div>`;
+  } else {
+    html += `<div class="tw"><table><thead><tr>
+      <th>Side</th><th>Strike</th><th>Expiry</th><th>Volume</th><th>OI</th><th>Vol/OI</th><th>Last</th><th>Notional</th><th>IV</th><th>Money</th><th>Bias</th>
+    </tr></thead><tbody>`;
+    unusual.forEach(u=>{
+      const isBull = u.bias==='BULL';
+      html += `<tr>
+        <td><span class="badge ${isBull?'bu':'bd'}">${u.side}</span></td>
+        <td class="mono">${u.strike}</td>
+        <td class="mono" style="font-size:11px">${u.expiry}</td>
+        <td class="mono" style="color:var(--amber)">${u.volume.toLocaleString()}</td>
+        <td class="mono" style="color:var(--text2)">${u.open_interest.toLocaleString()}</td>
+        <td class="mono" style="color:${u.vol_oi_ratio>5?'var(--green)':'var(--text2)'}">${u.vol_oi_ratio}x</td>
+        <td class="mono">$${u.last_price}</td>
+        <td class="mono" style="color:${isBull?'var(--green)':'var(--red)'};font-weight:600">${fmtM(u.notional)}</td>
+        <td class="mono" style="color:var(--text2)">${u.iv}%</td>
+        <td><span class="badge ${u.moneyness==='ITM'?'bu':u.moneyness==='ATM'?'bw':'bn'}">${u.moneyness}</span></td>
+        <td><span class="badge ${isBull?'bu':'bd'}">${u.bias}</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div>`;
+
+  document.getElementById('bm-content').innerHTML = html;
+}
+
+
+
+
+// ── ORB FUNCTIONS ──────────────────────────────────────────────────────────
+async function loadORB(sym, btn){
+  currentORBSym = sym;
+  document.querySelectorAll('#orb-sym-row .fb').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+
+  const content = document.getElementById('orb-content');
+  content.innerHTML = '<div class="nl">⏳ Fetching 5-min bars for '+sym+' via yfinance…</div>';
+
+  // Reset cards
+  ['orb-signal-val','orb-range-val','orb-filters-val','orb-strike-val'].forEach(id=>{
+    document.getElementById(id).textContent='—';
+    document.getElementById(id).style.color='var(--text2)';
+  });
+
+  try{
+    const r = await fetch(`${API}/api/orb?symbol=${sym}`);
+    if(!r.ok) throw new Error(`Server HTTP ${r.status}`);
+    const j = await r.json();
+    if(j.error) throw new Error(j.error);
+    orbData[sym] = j.data;
+    renderORB(sym, j.data);
+  }catch(e){
+    content.innerHTML = `<div class="nl" style="color:var(--red)">⚠ ${e.message}<br>
+      <span style="font-size:11px;color:var(--text2);margin-top:6px;display:block">
+        Needs Python server + market hours (5-min bars from yfinance).<br>
+        Run: <code>python server.py</code>
+      </span></div>`;
+  }
+}
+
+function renderORB(sym, d){
+  const orb  = d.orb;
+  const cur  = d.current;
+  const sig  = d.signal;
+  const opts = d.options;
+
+  // ── Summary cards ──────────────────────────────────────────────────────
+  const sigEl = document.getElementById('orb-signal-val');
+  if(sig.direction === 'BULL'){
+    sigEl.textContent = '⚡ BULL BREAKOUT';
+    sigEl.style.color = 'var(--green)';
+    document.getElementById('orb-signal-lbl').textContent = `Broke ORB high $${orb.high} at ${(sig.bar_time||'').slice(11,16)} ET`;
+  } else if(sig.direction === 'BEAR'){
+    sigEl.textContent = '⚡ BEAR BREAKDOWN';
+    sigEl.style.color = 'var(--red)';
+    document.getElementById('orb-signal-lbl').textContent = `Broke ORB low $${orb.low} at ${(sig.bar_time||'').slice(11,16)} ET`;
+  } else if(d.status === 'watching'){
+    sigEl.textContent = '◎ WATCHING';
+    sigEl.style.color = 'var(--amber)';
+    document.getElementById('orb-signal-lbl').textContent = `Price inside ORB $${orb.low}–$${orb.high}`;
+  } else {
+    sigEl.textContent = d.status.toUpperCase();
+    sigEl.style.color = 'var(--text2)';
+    document.getElementById('orb-signal-lbl').textContent = d.message||'';
+  }
+
+  const rangeEl = document.getElementById('orb-range-val');
+  rangeEl.textContent = `$${orb.range} (${orb.range_pct}%)`;
+  rangeEl.style.color = 'var(--text)';
+  document.getElementById('orb-range-lbl').textContent = `H $${orb.high}  ·  L $${orb.low}  ·  Mid $${orb.mid}`;
+
+  const filtersEl = document.getElementById('orb-filters-val');
+  const vwapOk = cur.above_vwap;
+  const emaOk  = cur.above_ema9;
+  filtersEl.textContent = `${vwapOk?'✓':'✗'} VWAP  ${emaOk?'✓':'✗'} EMA9`;
+  filtersEl.style.color = (vwapOk && emaOk)?'var(--green)':(!vwapOk && !emaOk)?'var(--red)':'var(--amber)';
+  document.getElementById('orb-filters-lbl').textContent =
+    `VWAP $${cur.vwap}  ·  EMA9 $${cur.ema9}  ·  Price $${cur.price}`;
+
+  const strikeEl = document.getElementById('orb-strike-val');
+  if(opts.best_strike){
+    const bs = opts.best_strike;
+    strikeEl.textContent = `$${bs.strike} ${bs.direction} Δ${bs.delta}`;
+    strikeEl.style.color = bs.direction==='CALL'?'var(--green)':'var(--red)';
+    document.getElementById('orb-strike-lbl').textContent =
+      `${bs.moneyness}  ·  Expiry ${opts.expiry}  ·  IV ${opts.iv}%`;
+  } else {
+    strikeEl.textContent = sig.direction==='NONE'?'No signal yet':'No valid strike';
+    document.getElementById('orb-strike-lbl').textContent = 'Delta 0.45–0.55 target';
+  }
+
+  // ── Main content ────────────────────────────────────────────────────────
+  let html = `<div style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:12px">
+    ${sym} · ${d.total_bars} bars today · ${(d.calculated_at||'').slice(0,16).replace('T',' ')} UTC · Source: ${d.source}
+  </div>`;
+
+  // ── 1. ORB Setup Panel ─────────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">📐 Opening Range Breakdown (30-min ORB)</div>
+    <div class="g4" style="margin-bottom:10px">
+      <div style="padding:10px;background:var(--gbg);border-radius:var(--r2);border:1px solid var(--green)">
+        <div style="font-size:11px;color:var(--text2)">ORB HIGH — resistance</div>
+        <div class="mono up" style="font-size:18px;font-weight:600">$${orb.high}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Break above → BUY CALL</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">ORB MID — pivot</div>
+        <div class="mono" style="font-size:18px;font-weight:600;color:var(--amber)">$${orb.mid}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Stop loss zone</div>
+      </div>
+      <div style="padding:10px;background:var(--rbg);border-radius:var(--r2);border:1px solid var(--red)">
+        <div style="font-size:11px;color:var(--text2)">ORB LOW — support</div>
+        <div class="mono dn" style="font-size:18px;font-weight:600">$${orb.low}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Break below → BUY PUT</div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Range</div>
+        <div class="mono" style="font-size:18px;font-weight:600;color:var(--text)">$${orb.range}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${orb.range_pct}% · ${orb.bars} bars</div>
+      </div>
+    </div>
+
+    <div style="padding:10px;border-radius:var(--r2);border:1px solid var(--border);background:var(--bg3);font-size:12px;color:var(--text2);line-height:1.6">
+      <strong style="color:var(--text)">Strategy rules:</strong>
+      BULL signal = close > ORB high <em>AND</em> price > VWAP <em>AND</em> price > EMA9 (5m) →
+      buy CALL with delta 0.45–0.55, stop at ORB mid, target at ORB high + 1.5× range.<br>
+      BEAR signal = close < ORB low <em>AND</em> price < VWAP <em>AND</em> price < EMA9 →
+      buy PUT same parameters.
+    </div>
+  </div>`;
+
+  // ── 2. Filter Status ──────────────────────────────────────────────────
+  html += `<div class="card">
+    <div class="ct">🔍 VWAP + EMA9 Filter Status</div>
+    <div class="g4" style="margin-bottom:0">
+      <div style="padding:10px;background:${cur.above_vwap?'var(--gbg)':'var(--rbg)'};border-radius:var(--r2);border:1px solid ${cur.above_vwap?'var(--green)':'var(--red)'}">
+        <div style="font-size:11px;color:var(--text2)">VWAP Filter</div>
+        <div style="font-size:20px;font-weight:600;color:${cur.above_vwap?'var(--green)':'var(--red)'}">${cur.above_vwap?'✓ PASS':'✗ FAIL'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">
+          Price $${cur.price} ${cur.above_vwap?'>':'<'} VWAP $${cur.vwap}
+        </div>
+      </div>
+      <div style="padding:10px;background:${cur.above_ema9?'var(--gbg)':'var(--rbg)'};border-radius:var(--r2);border:1px solid ${cur.above_ema9?'var(--green)':'var(--red)'}">
+        <div style="font-size:11px;color:var(--text2)">EMA9 (5m) Filter</div>
+        <div style="font-size:20px;font-weight:600;color:${cur.above_ema9?'var(--green)':'var(--red)'}">${cur.above_ema9?'✓ PASS':'✗ FAIL'}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">
+          Price $${cur.price} ${cur.above_ema9?'>':'<'} EMA9 $${cur.ema9}
+        </div>
+      </div>
+      <div style="padding:10px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">vs ORB</div>
+        <div style="font-size:14px;font-weight:600;color:${
+          cur.price_vs_orb==='above_high'?'var(--green)':
+          cur.price_vs_orb==='below_low'?'var(--red)':'var(--amber)'}">
+          ${cur.price_vs_orb.replace(/_/g,' ').toUpperCase()}
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Current: $${cur.price}</div>
+      </div>
+      <div style="padding:10px;background:${(cur.above_vwap&&cur.above_ema9)||(!cur.above_vwap&&!cur.above_ema9)?
+        (cur.above_vwap?'var(--gbg)':'var(--rbg)'):'var(--abg)'};border-radius:var(--r2);border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--text2)">Combined</div>
+        <div style="font-size:14px;font-weight:600;color:${
+          cur.above_vwap&&cur.above_ema9?'var(--green)':
+          !cur.above_vwap&&!cur.above_ema9?'var(--red)':'var(--amber)'}">
+          ${cur.above_vwap&&cur.above_ema9?'BULLISH SETUP':!cur.above_vwap&&!cur.above_ema9?'BEARISH SETUP':'MIXED — WAIT'}
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">Both filters aligned</div>
+      </div>
+    </div>
+  </div>`;
+
+  // ── 3. Trade Setup ────────────────────────────────────────────────────
+  if(sig.direction !== 'NONE'){
+    const isBull = sig.direction === 'BULL';
+    html += `<div class="card" style="background:${isBull?'var(--gbg)':'var(--rbg)'};border-color:${isBull?'var(--green)':'var(--red)'}">
+      <div class="ct">⚡ ${isBull?'BULL BREAKOUT':'BEAR BREAKDOWN'} — Trade Setup</div>
+      <div class="eg" style="margin-bottom:12px">
+        <div class="ec">
+          <div class="el">Entry</div>
+          <div class="ev en">$${sig.entry_price}</div>
+          <div style="font-size:10px;color:var(--text2);margin-top:2px">Close of breakout bar</div>
+        </div>
+        <div class="ec">
+          <div class="el">Stop</div>
+          <div class="ev es">$${sig.stop_price}</div>
+          <div style="font-size:10px;color:var(--text2);margin-top:2px">ORB midpoint</div>
+        </div>
+        <div class="ec">
+          <div class="el">Target</div>
+          <div class="ev et">$${sig.target_price}</div>
+          <div style="font-size:10px;color:var(--text2);margin-top:2px">1.5× ORB range</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px">
+        <span style="padding:4px 10px;background:var(--bg3);border-radius:var(--r2);font-family:'JetBrains Mono',monospace">
+          R/R: <strong style="color:var(--text)">${sig.risk_reward||'—'}:1</strong>
+        </span>
+        <span style="padding:4px 10px;background:var(--bg3);border-radius:var(--r2);font-family:'JetBrains Mono',monospace">
+          VWAP at signal: <strong>$${sig.vwap_at_signal}</strong>
+        </span>
+        <span style="padding:4px 10px;background:var(--bg3);border-radius:var(--r2);font-family:'JetBrains Mono',monospace">
+          EMA9 at signal: <strong>$${sig.ema9_at_signal}</strong>
+        </span>
+        <span style="padding:4px 10px;background:var(--bg3);border-radius:var(--r2);font-family:'JetBrains Mono',monospace">
+          Signal bar: <strong>${(sig.bar_time||'').slice(11,16)} ET</strong>
+        </span>
+      </div>
+    </div>`;
+  } else {
+    html += `<div class="card" style="background:var(--abg);border:1px solid var(--amber)">
+      <div class="ct">◎ Waiting for ORB Breakout</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.7">
+        Price is currently <strong style="color:var(--amber)">${cur.price_vs_orb.replace(/_/g,' ')}</strong>
+        the ORB range ($${orb.low} – $${orb.high}).
+        ${cur.above_vwap && cur.above_ema9 ? '✓ Both filters bullish — ready for BULL breakout above $'+orb.high+'.' :
+          !cur.above_vwap && !cur.above_ema9 ? '✗ Both filters bearish — ready for BEAR breakdown below $'+orb.low+'.' :
+          '⚠ Filters mixed — wait for alignment before entering.'}
+      </div>
+    </div>`;
+  }
+
+  // ── 4. Delta Strike Selection ─────────────────────────────────────────
+  if(opts.candidates && opts.candidates.length > 0){
+    html += `<div class="card">
+      <div class="ct">🎯 Strike Selection — Delta 0.45–0.55 (Near ATM)</div>
+      <div style="margin-bottom:10px;font-size:12px;color:var(--text2);line-height:1.6">
+        Target delta 0.45–0.55 gives good leverage with reasonable premium.
+        Delta ~0.50 = ATM = highest gamma, most responsive to price move.
+        Expiry: <strong style="color:var(--text)">${opts.expiry}</strong> · IV: <strong style="color:var(--amber)">${opts.iv}%</strong>
+      </div>
+      <div class="tw"><table><thead><tr>
+        <th>Side</th><th>Strike</th><th>Delta</th><th>Moneyness</th><th>Expiry</th><th>Contract</th><th>Recommendation</th>
+      </tr></thead><tbody>`;
+
+    opts.candidates.forEach((c,i)=>{
+      const isBest = i===0;
+      const isBull = c.direction==='CALL';
+      html += `<tr style="${isBest?'background:var(--gbg)':''}">
+        <td><span class="badge ${isBull?'bu':'bd'}">${c.direction}</span></td>
+        <td class="mono" style="font-weight:${isBest?600:400}">$${c.strike}</td>
+        <td class="mono" style="color:${Math.abs(c.delta-0.5)<0.03?'var(--green)':'var(--text)'}">Δ${c.delta}</td>
+        <td><span class="badge ${c.moneyness==='ATM'?'bw':c.moneyness==='ITM'?'bu':'bn'}">${c.moneyness}</span></td>
+        <td class="mono" style="font-size:11px">${c.expiry}</td>
+        <td class="mono" style="font-size:11px">${c.contract}</td>
+        <td style="font-size:11px;color:${isBest?'var(--green)':'var(--text2)'}">${isBest?'⭐ BEST — closest to Δ0.50':'Alternative'}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>
+      <div style="margin-top:10px;padding:8px 12px;background:var(--bg3);border-radius:var(--r2);font-size:12px;color:var(--text2)">
+        <strong style="color:var(--text)">Why delta 0.45–0.55?</strong>
+        At delta 0.50 the option moves ~$0.50 per $1 move in the underlying — giving efficient leverage.
+        Below 0.40 = too little response. Above 0.65 = too expensive for day trade. This range gives the best risk/reward for ORB plays.
+      </div>
+    </div>`;
+  }
+
+  // ── 5. 5-min Chart Data ────────────────────────────────────────────────
+  if(d.chart_bars && d.chart_bars.length > 0){
+    const bars = d.chart_bars;
+    html += `<div class="card">
+      <div class="ct">📊 5-min Price / VWAP / EMA9 — last ${bars.length} bars</div>
+      <div style="overflow-x:auto">
+      <table><thead><tr>
+        <th>Time (ET)</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Vol</th><th>VWAP</th><th>EMA9</th><th>vs VWAP</th><th>vs EMA9</th><th>Tag</th>
+      </tr></thead><tbody>`;
+    bars.forEach(b=>{
+      const isORB  = b.is_orb;
+      const isBK   = b.is_breakout;
+      const aboveV = b.close > b.vwap;
+      const aboveE = b.close > b.ema9;
+      const rowStyle = isBK?'background:var(--gbg);font-weight:600':isORB?'background:var(--bbg)':'';
+      const timeStr  = (b.time||'').slice(0,8);
+      html += `<tr style="${rowStyle}">
+        <td class="mono" style="font-size:11px">${timeStr}</td>
+        <td class="mono" style="font-size:11px">$${b.open}</td>
+        <td class="mono up" style="font-size:11px">$${b.high}</td>
+        <td class="mono dn" style="font-size:11px">$${b.low}</td>
+        <td class="mono" style="font-size:11px;font-weight:600;color:${b.close>=b.open?'var(--green)':'var(--red)'}">$${b.close}</td>
+        <td class="mono" style="font-size:11px;color:var(--text2)">${(b.volume/1000).toFixed(0)}K</td>
+        <td class="mono" style="font-size:11px;color:var(--blue)">$${b.vwap}</td>
+        <td class="mono" style="font-size:11px;color:var(--amber)">$${b.ema9}</td>
+        <td style="font-size:10px"><span class="badge ${aboveV?'bu':'bd'}">${aboveV?'↑':'↓'}</span></td>
+        <td style="font-size:10px"><span class="badge ${aboveE?'bu':'bd'}">${aboveE?'↑':'↓'}</span></td>
+        <td style="font-size:10px">${isBK?'<span class="badge bw">⚡ SIGNAL</span>':isORB?'<span class="badge bi">ORB</span>':''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace">
+        🔵 Blue = VWAP &nbsp;·&nbsp; 🟡 Amber = EMA9 (5m) &nbsp;·&nbsp;
+        ORB bars = first ${orb.bars} bars (9:30–10:00 ET) &nbsp;·&nbsp; Signal bar highlighted green
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('orb-content').innerHTML = html;
+}
+
+// ── STARTUP ───────────────────────────────────────────────────────
+boot();
+loadNews();
+setInterval(boot, 60000);
+setInterval(loadNews, 300000);
+</script>
+
+<!-- SMC TAB -->
+<div class="tc" id="tab-smc">
+
+  <!-- Summary row -->
+  <div class="g4" id="smc-summary-grid">
+    <div class="card" style="margin:0"><div class="ct">🧠 SMC Score</div><div class="mb mono" id="smc-score-val">—</div><div class="ms" id="smc-score-lbl">Select a symbol</div></div>
+    <div class="card" style="margin:0"><div class="ct">📐 Structure</div><div class="mb" id="smc-bias">—</div><div class="ms" id="smc-bias-lbl">CHoCH / BoS</div></div>
+    <div class="card" style="margin:0"><div class="ct">⚡ FVG</div><div class="mb" id="smc-fvg-val">—</div><div class="ms" id="smc-fvg-lbl">Active gaps</div></div>
+    <div class="card" style="margin:0"><div class="ct">🧱 Order Block</div><div class="mb" id="smc-ob-val">—</div><div class="ms" id="smc-ob-lbl">Unbroken OBs</div></div>
+  </div>
+  <br>
+
+  <!-- Symbol selector -->
+  <div class="fr" id="smc-sym-row">
+    <button class="fb active" onclick="loadSMC('NVDA',this)">NVDA</button>
+    <button class="fb" onclick="loadSMC('GOOG',this)">GOOG</button>
+  </div>
+
+  <div id="smc-content"><div class="nl">⏳ Select a symbol above to load SMC analysis…</div></div>
+
+  <!-- AI SMC -->
+  <div class="card" style="margin-top:12px">
+    <div class="ct">🤖 AI SMC Analyst</div>
+    <input type="text" id="smcin" placeholder="e.g. NVDA — is the FVG a valid entry? Where is smart money positioned?"/>
+    <button class="ab p" onclick="runAI('smc')">✦ Analyze ↗</button>
+    <button class="ab" onclick="ask('Which signal has the best SMC confluence — FVG + OB alignment + bullish structure?')">Best confluence ↗</button>
+    <div class="aibox" id="ai-smc"></div>
+  </div>
+</div>
+
+
+</body>
+</html>

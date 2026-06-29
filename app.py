@@ -25,7 +25,7 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 EODHD_KEY     = os.getenv("EODHD_KEY",        "6a39c434eccce5.23158388")
-FINNHUB_KEY   = os.getenv("FINNHUB_KEY",       "d8tkkc9r01qhcnk4dqkgd8tkkc9r01qhcnk4dql0")
+FINNHUB_KEY   = os.getenv("FINNHUB_KEY",       "d8su0nhr01qh5revj690")
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 PORT          = int(os.getenv("PORT", 3001))
 
@@ -1255,4 +1255,4 @@ def ai_proxy(req:AIRequest):
 
 if __name__=="__main__":
     import uvicorn
-    uvicorn.run("server:app",host="0.0.0.0",port=PORT,reload=False,log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=PORT, reload=False, log_level="info")

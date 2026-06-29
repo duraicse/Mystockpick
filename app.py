@@ -6,7 +6,6 @@ All data from EODHD (prices, history, S/R, indicators, SMC, ORB)
 News: Finnhub → RSS fallback
 Options/BigMoney: yfinance imported lazily (only when endpoint called)
 AI: Anthropic proxy
-
 Run: python server.py
 """
 
